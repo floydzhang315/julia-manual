@@ -71,26 +71,26 @@
 使用下列函数，可在任意维度连接数组：
 
 
-|Function|              Description|
+|函数|              描述|
 |:---|:----|       
-|``cat(k, A...)`` | concatenate input n-d arrays along the dimension ``k``|
-|``vcat(A...)``   |shorthand for ``cat(1, A...)``|
-|``hcat(A...)``   |shorthand for ``cat(2, A...)``|
+|``cat(k, A...)`` | 在 ``k`` 维度上连接输入 n-d 数组|
+|``vcat(A...)``   | ``cat(1, A...)`` 的简写|
+|``hcat(A...)``   |``cat(2, A...)`` 的简写|
 
 
-Scalar values passed to these functions are treated as 1-element arrays.
+传递给这些函数的标量值被视为一元阵列。
 
-The concatenation functions are used so often that they have special syntax:
+级联功能非常常用，所以为它们设计了特殊的语法：
 
-|Expression|               Calls|
+
+|表示|               调用|
 |:---|:----|  
 |``[A B C ...]``     |``hcat``|
 |``[A, B, C, ...]``  |``vcat``|
 |``[A B; C D; ...]`` |``hvcat``|
 
 
-``hvcat`` concatenates in both dimension 1 (with semicolons) and dimension 2
-(with spaces).
+``hvcat`` 可以实现一维上的（使用分号间隔）或二维上的（使用空格间隔）的级联。
 
 
 ### Comprehensions
@@ -195,10 +195,8 @@ Comprehensions 用于构造数组。它的语法类似于数学中的集合标�
      7  11
 ```
 
-Empty ranges of the form ``n:n-1`` are sometimes used to indicate the inter-index
-location between ``n-1`` and ``n``.  For example, the ``searchsorted`` function uses
-this convention to indicate the insertion point of a value not found in a sorted
-array:
+``n:n-1`` 形式的空范围有时用来表示相互索引位置在 ``n-1`` 和 ``n``之间。例如，在 ``searchsorted`` 函数使用本习惯指出插入点的值不在排序后的数组中：
+
 
 ```
     julia> a = [1,2,5,6,7];
@@ -274,12 +272,10 @@ array:
 4.  一元布尔值或位运算： ``~``
 5.  二元布尔值或位运算： ``&``, ``|``, ``$``
 
-Some operators without dots operate elementwise anyway when one argument is a
-scalar. These operators are ``*``, ``/``, ``\``, and the bitwise
-operators.
+一些没有“点”（逐元素）操作运算符当一个参数是一个标量时会被使用。这些运算符有 ``*``, ``/``, ``\`` 和按位运算符。
 
-Note that comparisons such as ``==`` operate on whole arrays, giving a single
-boolean answer. Use dot operators for elementwise comparisons.
+请注意，像 ``==`` 操作这样的比较运算是操作在整个阵列上的，它会给出一个布尔返回值。逐位的比较使用点操作符。
+
 
 下列内置的函数也都是向量化的, 即函数是逐元素版本的：
 
@@ -375,17 +371,10 @@ Julia 的基础数组类型是抽象类型 ``AbstractArray{T,N}`` ，其中维�
 
 ``AbstractArray`` 类型包含任何形似数组的类型， 而且它的实现和通常的数组会很不一样。例如，任何具体的 ``AbstractArray{T，N}`` 至少要有 ``size(A)`` (返回 ``Int`` 多元组)， ``getindex(A,i)`` 和 ``getindex(A,i1,...,iN)`` (返回 ``T`` 类型的一个元素), 可变的数组要能 ``setindex！``。 这些操作都要求在近乎常数的时间复杂度或 O(1) 复杂度，否则某些数组函数就会特别慢。具体的类型也要提供类似于 ``similar(A,T=eltype(A),dims=size(A))`` 的方法用来分配一个拷贝。
 
+``DenseArray`` 是一个抽象的  ``AbstractArray`` 类型的亚型，它应该包括在内存的常规偏移上的所有数组，因此可以被传递到外部在此内存布局上的 C 和 Fortran 函数。  
+亚型应该提供一个方法 ``stride(A,k)``  ，使之返回“跨越”的维度  ``k`` ：向给出的维度  ``k`` 加  ``1``  应该使 ``getindex(A,i)`` 中的 ``i`` 增加  ``stride(A,k)`` 。如果提供了一个指针转换方法 ``convert(Ptr{T}, A)``，那么内存布局应该以相同的方式对应于这些扩展。
 
 
-``DenseArray`` is an abstract subtype of ``AbstractArray`` intended
-to include all arrays that are laid out at regular offsets in memory,
-and which can therefore be passed to external C and Fortran functions
-expecting this memory layout.  Subtypes should provide a method
-``stride(A,k)`` that returns the "stride" of dimension ``k``:
-increasing the index of dimension ``k`` by ``1`` should increase the
-index ``i`` of ``getindex(A,i)`` by ``stride(A,k)``.  If a
-pointer conversion method ``convert(Ptr{T}, A)`` is provided, the
-memory layout should correspond in the same way to these strides.
 
 ``Array{T,N}`` 类型是 ``DenseArray`` 的特殊实例，它的元素以列序为主序存储（详见 :ref:`man-performance-tips` ）。 ``Vector`` 和 ``Matrix`` 是分别是它 1 维 和 2 维的别名。
 
