@@ -135,11 +135,9 @@ julia> eval(ex)
 3
 ```
 
-Every :ref:[moduleas](module-learning.md) its own ``eval`` function that
-evaluates expressions in its global scope.
-Expressions passed to ``eval`` are not limited to returning values
-— they can also have side-effects that alter the state of the enclosing
-module's environment:
+一 :参考:[组件](module-learning.md) 它本身的 ``eval`` 函数在全局范围内的计算表达式。  
+传递给 ``eval`` 的表达式不限于返回一个值 - 他们也会具有改变封闭模块的环境状态的副作用：
+
 
 
 ```
@@ -472,11 +470,11 @@ end
 反射
 ----
 
-In addition to the syntax-level introspection utilized in metaprogramming,
-Julia provides several other runtime reflection capabilities.
+除了使用元编程语法层面的反思，朱丽亚还提供了一些其他的运行时反射能力。
 
-**Type fields** The names of data type fields (or module members) may be interrogated
-using the ``names`` command. For example, given the following type：
+
+**类型字段**  数据类型的域的名称（或模块成员）可以使用 ``names`` 命令来询问。例如，给定以下类型：
+
 
 ```
 type Point
@@ -485,8 +483,7 @@ type Point
 end
 ```
 
-``names(Point)`` will return the array ``Any[:x, :y]``. The type of
-each field in a ``Point`` is stored in the ``types`` field of the Point object：
+``names(Point)`` 将会返回指针 ``Any[:x, :y]``. 在一个 ``Point`` 中每一个域的类型都会被存储在指针对象的 ``types``域中： 
 
 ```
 julia> typeof(Point)
@@ -495,9 +492,7 @@ julia> Point.types
 (FloatingPoint,Any)
 ```
 
-**Subtypes** The *direct* subtypes of any DataType may be listed using
-``subtypes(t::DataType)``. For example, the abstract DataType ``FloatingPoint``
-has four (concrete) subtypes::
+**亚型**  任何数据类型的*直接*亚型可以使用 ``subtypes(t::DataType)`` 来列表查看。例如，抽象数据类型  ``FloatingPoint`` 包含四种（具体的）亚型：：  
 
 ```
 julia> subtypes(FloatingPoint)
@@ -508,24 +503,14 @@ julia> subtypes(FloatingPoint)
  Float64
 ```
 
-Any abstract subtype will also be included in this list, but further subtypes
-thereof will not; recursive applications of ``subtypes`` allow to build the
-full type tree.
+任何一个抽象的亚型也将被列入此列表中，但其进一步的亚型则不会；“亚型”的递归应用程序允许建立完整的类型树。
 
-**Type internals** The internal representation of types is critically important
-when interfacing with C code. ``isbits(T::DataType)`` returns true if `T` is
-stored with C-compatible aligment. The offsets of each field may be listed
-using ``fieldoffsets(T::DataType)``.
 
-**Function methods** The methods of any function may be listed using
-``methods(f::Function)``.
+**类型内部** 当使用到 C  代码接口时类型的内部表示是非常重要的。``isbits(T::DataType)`` 在 `T` 存储在C语言兼容定位时返回 true 。每一个域内的补偿量可以使用 ``fieldoffsets(T::DataType)`` 语句实现列表显示。
 
-**Function representations** Functions may be introspected at several levels
-of representation. The lowered form of a function is available
-using ``code_lowered(f::Function, (Args...))``, and the type-inferred lowered form
-is available using ``code_typed(f::Function, (Args...))``.
 
-Closer to the machine, the LLVM Intermediate Representation of a function is
-printed by ``code_llvm(f::Function, (Args...))``, and finally the resulting
-assembly instructions (after JIT'ing step) are available using
-``code_native(f::Function, (Args...)``.
+**函数方法** 函数内的所有方法可以通过 ``methods(f::Function)`` 语句列表显示出来.
+
+**函数表示** 函数可以在几个表示层次上实现内部检查。一个函数的更低形式在使用 ``code_lowered(f::Function, (Args...))``时是可用的，而类型推断的更低形式在使用  ``code_typed(f::Function, (Args...))`` 时是可用的。
+
+更接近机器的是，LLVM 的中间表示的函数是通过  ``code_llvm(f::Function, (Args...))`` 打印的，并且最终的由此产生的汇编指令在使用 ``code_native(f::Function, (Args...)`` 时是可用的。
