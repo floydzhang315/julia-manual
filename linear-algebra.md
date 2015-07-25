@@ -13,10 +13,10 @@
 |:----|:----|
 |CholeskyPivoted|	主元 Cholesky 分解|
 |LU |	LU 分解|
-|LUTridiagonal |	LU factorization for Tridiagonal matrices|
-|UmfpackLU	|LU factorization for sparse matrices (computed by UMFPack)|
-|QR	|QR factorization|
-|QRCompactWY	|Compact WY form of the QR factorization|
+|LUTridiagonal |三对角矩阵的 LU 因子分解|
+|UmfpackLU	|稀疏矩阵的 LU 分解（使用 UMFPACK 计算）|
+|QR	|QR 分解|
+|QRCompactWY	|QR 分解的紧凑WY形式|
 |QRPivoted	|主元 QR 分解|
 |Hessenberg	|Hessenberg 分解|
 |Eigen|	特征分解|
@@ -84,4 +84,4 @@
 
 缩放运算
 --------
-A ``UniformScaling`` operator represents a scalar times the identity operator, ``λ*I``. The identity operator ``I`` is defined as a constant and is an instance of ``UniformScaling``. The size of these operators are generic and match the other matrix in the binary operations ``+``,``-``,``*`` and ``\``. For ``A+I`` and ``A-I`` this means that ``A`` must be square. Multiplication with the identity operator ``I`` is a noop (except for checking that the scaling factor is one) and therefore almost without overhead. 
+一个 ``UniformScaling`` 运算符代表了一个单位算子的标量次数, ``λ*I``。 单位算子 ``I`` 被定义为一个常量且是 ``UniformScaling`` 的一个实例。 这些运算符的尺寸是一般大小，可匹配  ``+``,``-``,``*`` 和 ``\`` 等其它二元运算符中的矩阵。 对于 ``A+I`` 和 ``A-I`` 这意味着 ``A`` 必须是一个方阵. 使用了单位算子``I`` 的乘法运算是一个空操作(除非缩放因子为一) ，因此基本没有开销。
