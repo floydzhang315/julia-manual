@@ -38,27 +38,22 @@ Julia 的模块是一个独立的全局变量工作区。它由句法限制在 `
 
 语句 ``using BigLib: thing1, thing2`` 是 ``using BigLib.thing1, BigLib.thing2`` 的缩写。
 
-The ``import`` keyword supports all the same syntax as ``using``, but only
-operates on a single name at a time. It does not add modules to be searched
-the way ``using`` does. ``import`` also differs from ``using`` in that
-functions must be imported using ``import`` to be extended with new methods.
-
-In ``MyModule`` above we wanted to add a method to the standard ``show``
-function, so we had to write ``import Base.show``.
-Functions whose names are only visible via ``using`` cannot be extended.
-
-The keyword ``importall`` explicitly imports all names exported by the
-specified module, as if ``import`` were individually used on all of them.
-
-Once a variable is made visible via ``using`` or ``import``, a module may
-not create its own variable with the same name.
-Imported variables are read-only; assigning to a global variable always
-affects a variable owned by the current module, or else raises an error.
-
-## Summary of module usage
+ ``import`` 关键字支持与 ``using`` 所有相同的语法，但只能在一个时间上对一个名称进行操作。它不像 ``using``  那样会添加用于搜索的模块。``import`` 与  ``using``  的不同之处还在于导入这一功能时必须使用新的方法扩展后的   ``import``  。  
+ 
+在上述的  ``MyModule``  中我们想向标准的 ``show`` 功能增加一个方法，所以我们必须写下  ``import Base.show``。  
+ 
+ 那些函数名只有通过  ``using`` 功能才能看到的函数是不能被扩展的。  
+ 
+ ``importall`` 关键字显式地导入导出指定模块的所有名称，其效果就像 ``import`` 单独使用在它们的所有名称一样。  
+ 
+一旦一个变量是通过 ``using``  或  ``import` 使其可见的，一个模块就可能无法创建它自己的同名的变量了。  
+输入变量必须是只读的；对全局变量赋值总是会影响当前模块所拥有的变量，否则就会引发错误。
 
 
-To load a module, two main keywords can be used: ``using`` and ``import``. To understand their differences, consider the following example::
+## 模块使用方法的总结
+
+我们要加载一个模块时，可以使用两个主要关键字： ``using`` 和 ``import``。要了解他们的差异，可以考虑下面的例子：：
+
 
 ```
     module MyModule
@@ -72,9 +67,10 @@ To load a module, two main keywords can be used: ``using`` and ``import``. To un
     end
 ```
 
-In this module we export the ``x`` and ``y`` functions (with the keyword ``export``), and also have the non-exported function ``p``. There are several different ways to load the Module and its inner functions into the current workspace:
+在这个模块中我们（使用关键字  ``export`` ）导出 ``x`` 和 ``y``  功能，也包含了非导出函数 ``p`` 。我们有几个不同的方法来加载该模块及其内部功能到当前工作区，具体如下：
 
-|Import Command|	What is brought into scope|	Available for method extension|
+
+|导入命令|	导入变量|	方法扩展可用项|
 |:------|:-----|:-------|
 |using MyModule |	All export ed names (x and y), MyModule.x, MyModule.y and MyModule.p	MyModule.x, MyModule.y and MyModule.p|
 |using MyModule .x, MyModule.p|	x and p	 | |
@@ -191,8 +187,9 @@ Base 是标准库（ 在 base/ 文件夹下）。所有的模块都隐含地调�
 
 如果一个命名是有许可的(qualified)（如 ``Base.sin`` ），即使它没被 export ，仍能被外部读取。这在调试时非常有用。
 
-import 或 export 宏时，要在宏名字前添加 ``@`` 符号，例如 ``import Mod.@mac`` 。Macros in other modules can be invoked as ``Mod.@mac``
-or ``@Mod.mac``.
+import 或 export 宏时，要在宏名字前添加 ``@`` 符号，例如 ``import Mod.@mac`` 。在其他模块中的宏可以被调用为 ``Mod.@mac``
+或 ``@Mod.mac`` 。
+
 
 形如 ``M.x = y`` 的语法是错的，不能给另一个模块中的全局变量赋值；全局变量的赋值都是在变量所在的模块中进行的。
 
