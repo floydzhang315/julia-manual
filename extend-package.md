@@ -1,6 +1,4 @@
-
 # 扩展包
-
 
 Julia 内置了一个包管理系统，可以用这个系统来完成包的管理，当然，你也可以用你的操作系统自带的，或者从源码编译。
 你可以在 http://pkg.julialang.org  找到所有已注册（一种发布包的机制）的包的列表。
@@ -47,17 +45,11 @@ Julia 内置了一个包管理系统，可以用这个系统来完成包的管�
 
 ## 添加和删除扩展包
 
+Julia 的包管理有一点不同这是因为它是生命而不是必要。这意味着你告诉它你想要什么，它就会知道安装什么版本（或移除）来有选择地满足那些需求 - 最低程度下地。所以不是安装一个包，你只是添加它到需求列表然后“解决”什么需要被安装。特别的，这意味着如果一些包因为它被你想要东西的前一个版本所需要而已经被安装，而且一个更新的版本不再有那个需求了，更新将真正移除那个包。
 
-Julia's package manager is a little unusual in that it is declarative rather than imperative.
-This means that you tell it what you want and it figures out what versions to install (or remove) to satisfy those requirements optimally – and minimally.
-So rather than installing a package, you just add it to the list of requirements and then "resolve" what needs to be installed.
-In particular, this means that if some package had been installed because it was needed by a previous version of something you wanted, and a newer version doesn't have that requirement anymore, updating will actually remove that package.
+你的包需求在文件 ``~/.julia/v0.3/REQUIRE`` 中。你可以手动编辑这个文件，然后调用 ``Pkg.resolve()`` 方法来安装，升级或者移除包来有选择地满足需求，或者你可以做 ``Pkg.edit()``，它将在你的编辑器中打开 ``REQUIRE``（通过 ``EDITOR`` 或者 ``VISUAL`` 环境变量配置），然后之后自动调用 ``Pkg.resolve()``，如果有必要的话。如果你仅仅想要添加或者移除一个单一包的需求，你也可以使用非交互的 ``Pkg.add`` 和 ``Pkg.rm`` 命令，它添加或移除一个单一的需求来 ``REQUIRE``，然后调用 ``Pkg.resolve()``。
 
-Your package requirements are in the file ``~/.julia/v0.3/REQUIRE``.
-You can edit this file by hand and then call ``Pkg.resolve()`` to install, upgrade or remove packages to optimally satisfy the requirements, or you can do ``Pkg.edit()``, which will open ``REQUIRE`` in your editor (configured via the ``EDITOR`` or ``VISUAL`` environment variables), and then automatically call ``Pkg.resolve()`` afterwards if necessary.
-If you only want to add or remove the requirement for a single package, you can also use the non-interactive ``Pkg.add`` and ``Pkg.rm`` commands, which add or remove a single requirement to ``REQUIRE`` and then call ``Pkg.resolve()``.
-
-You can add a package to the list of requirements with the ``Pkg.add`` function, and the package and all the packages that it depends on will be installed:
+你可以用 ``Pkg.add`` 函数添加一个包到需求列表，这个包和所有它所依赖的包都将被安装：
 
 ```
     julia> Pkg.status()
@@ -80,15 +72,14 @@ You can add a package to the list of requirements with the ``Pkg.add`` function,
      - Stats                         0.2.6
 ```
 
-What this is doing is first adding ``Distributions`` to your ``~/.julia/v0.3/REQUIRE`` file:
+这所做的事情首先是添加 ``Distributions`` 到你的 ``~/.julia/v0.3/REQUIRE`` 文件：
 
 ```
     $ cat ~/.julia/v0.3/REQUIRE
     Distributions
 ```
 
-It then runs ``Pkg.resolve()`` using these new requirements, which leads to the conclusion that the ``Distributions`` package should be installed since it is required but not installed.
-As stated before, you can accomplish the same thing by editing your ``~/.julia/v0.3/REQUIRE`` file by hand and then running ``Pkg.resolve()`` yourself:
+然后它使用这些新的需求运行 ``Pkg.resolve()``，它导向了 ``Distributions`` 包应该被安装因为它是必需的而且没有被安装的结论。正如之前所声明的，你可以通过手动编辑你的 ``~/.julia/v0.3/REQUIRE`` 文件完成相同的事情然后自己运行 ``Pkg.resolve()``。
 
 ```
     $ echo UTF16 >> ~/.julia/v0.3/REQUIRE
@@ -106,17 +97,9 @@ As stated before, you can accomplish the same thing by editing your ``~/.julia/v
      - Stats                         0.2.6
  ```
 
-This is functionally equivalent to calling ``Pkg.add("UTF16")``,
-except that ``Pkg.add`` doesn't change ``REQUIRE`` until *after*
-installation has completed, so if there are problems, ``REQUIRE`` will
-be left as it was before calling ``Pkg.add``.  The format of the
-``REQUIRE`` file is described in `Requirements Specification`_; it
-allows, among other things, requiring specific ranges of versions of
-packages.
+这和调用 ``Pkg.add("UTF16")``功能相同，除了 ``Pkg.add`` 直到在安装完成之后才改变 ``REQUIRE``，所以如果有问题的话，``REQUIRE`` 将被剩下，正如在调用 ``Pkg.add`` 之前。``REQUIRE`` 文件的格式在 [Requirements Specification](http://julia-cn.readthedocs.org/zh_CN/latest/manual/packages/#man-package-requirements)中被描述；它允许在其他事物中获得特定包版本的范围。  
 
-When you decide that you don't want to have a package around any more,
-you can use ``Pkg.rm`` to remove the requirement for it from the
-``REQUIRE`` file:
+当你决定你不想再拥有一个包，你可以使用 ``Pkg.rm`` 来从 ``REQUIRE`` 文件移除它的需求：  
 
 ```
     julia> Pkg.rm("Distributions")
@@ -137,11 +120,9 @@ you can use ``Pkg.rm`` to remove the requirement for it from the
     No packages installed.
 ```
 
-Once again, this is equivalent to editing the ``REQUIRE`` file to remove the line with each package name on it then running ``Pkg.resolve()`` to update the set of installed packages to match.
-While ``Pkg.add`` and ``Pkg.rm`` are convenient for adding and removing requirements for a single package, when you want to add or remove multiple packages, you can call ``Pkg.edit()`` to manually change the contents of ``REQUIRE`` and then update your packages accordingly.
-``Pkg.edit()`` does not roll back the contents of ``REQUIRE`` if ``Pkg.resolve()`` fails – rather, you have to run ``Pkg.edit()`` again to fix the files contents yourself.
+再一次，这和编辑 ``REQUIRE`` 文件来移除有着包名的那一行然后运行 ``Pkg.resolve()``来更改安装包的集合来匹配相类似。尽管 ``Pkg.add`` 和 ``Pkg.rm`` 对于添加和移除单个包的需求来说是方便的，当你想要添加或移除多个包时，你可以调用 ``Pkg.edit()``来手动地改变 ``REQUIRE`` 的内容然后根据情况更新你的包。``Pkg.edit()``不回滚 ``REQUIRE`` 的内容如果 ``Pkg.resolve()``失效 - 不如说，你不得不再一次运行 ``Pkg.edit()``来修改文档内容。
 
-Because the package manager uses git internally to manage the package git repositories, users may run into protocol issues (if behind a firewall, for example), when running ``Pkg.add``. The following command can be run from the command line to tell git to use 'https' instead of the 'git' protocol when cloning repositories:
+因为包管理内部使用 git 来管理包 git 仓库，当运行 ``Pkg.add`` 时，用户可能会碰上协议的问题（比如在一个防火墙后）。接下来的命令可在命令行中被运行来告诉 git 当克隆仓库时使用 'https' 而不是 'git' 协议。
 
 ```
     git config --global url."https://".insteadOf git://
@@ -149,11 +130,7 @@ Because the package manager uses git internally to manage the package git reposi
 
 ## 安装未注册的扩展包
 
-
-Julia packages are simply git repositories, clonable via any of the [protocols](https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS) that git supports, and containing Julia code that follows certain layout conventions.
-Official Julia packages are registered in the [METADATA.jl](https://github.com/JuliaLang/METADATA.jl) repository, available at a well-known location [1]_.
-The ``Pkg.add`` and ``Pkg.rm`` commands in the previous section interact with registered packages, but the package manager can install and work with unregistered packages too.
-To install an unregistered package, use ``Pkg.clone(url)``, where ``url`` is a git URL from which the package can be cloned:
+Julia 包仅仅是 git 仓库，在任何 git 支持的[协议](https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS)上都是可克隆的，而且包含遵循特定布局惯例的 Julia 代码。官方的 Julia 包在 [METADATA.jl](https://github.com/JuliaLang/METADATA.jl) 仓库中注册，在可以著名的地方可获得。在之前的段落中，``Pkg.add`` 和 ``Pkg.rm`` 命令和注册的包交互，但是包管理也能安装并使用未注册的包。为了安装未注册的包，使用 ``Pkg.clone(url)``，在那里 ``url`` 是一个包能被克隆的 git URL： 
 
 ```
     julia> Pkg.clone("git://example.com/path/to/Package.jl.git")
@@ -166,19 +143,15 @@ To install an unregistered package, use ``Pkg.clone(url)``, where ``url`` is a g
     Resolving deltas: 100% (8/8), done.
 ```
 
-By convention, Julia repository names end with ``.jl`` (the additional ``.git`` indicates a "bare" git repository), which keeps them from colliding with repositories for other languages, and also makes Julia packages easy to find in search engines.
-When packages are installed in your ``.julia/v0.3`` directory, however, the extension is redundant so we leave it off.
+按照惯例，Julia 仓库用一个 ``.jl`` 的结尾命名（附加的 ``.git`` 指示了一个“裸” git 仓库），这防止它们和其他语言的仓库碰撞，也使得 Julia 包在搜索引擎中方便找到。当包在你的 ``.julia/v0.3`` 目录下安装时，然而，扩展是多余的，所以我们将它留下。
 
-If unregistered packages contain a ``REQUIRE`` file at the top of their source tree, that file will be used to determine which registered packages the unregistered package depends on, and they will automatically be installed.
-Unregistered packages participate in the same version resolution logic as registered packages, so installed package versions will be adjusted as necessary to satisfy the requirements of both registered and unregistered packages.
+如果未注册的包在它们的资源树的顶部包含 ``REQUIRE`` 文件，那这个文件将被用来决定未注册的包依赖于哪些注册的包，而且它们将自动被安装。未注册的包和注册的包一样，具有相同版本的解决逻辑，所以安装过的包版本将在必要时调整来满足注册过的和未注册过的包的需求。
 
-[1] The official set of packages is at https://github.com/JuliaLang/METADATA.jl, but individuals and organizations can easily use a different metadata repository. This allows control which packages are available for automatic installation. One can allow only audited and approved package versions, and make private packages or forks available.
+[1] 官方的包集在 [https://github.com/JuliaLang/METADATA.jl](https://github.com/JuliaLang/METADATA.jl)，但是个人和组织能简单地使用一个不同的元数据仓库。这允许包可以自动安装的控制。我们可以仅允许审计通过的和批准的包版本，并使得私人的包和 fork 可被获得。
 
 ## 更新扩展包
 
-
-When package developers publish new registered versions of packages that you're using, you will, of course, want the new shiny versions.
-To get the latest and greatest versions of all your packages, just do ``Pkg.update()``:
+当包开发者发布你正在使用的新的注册的包版本时，你当然，想要新的版本。为了获得最新和最棒的包版本，只要 ``Pkg.update()``:
 
 ```
     julia> Pkg.update()
@@ -188,27 +161,19 @@ To get the latest and greatest versions of all your packages, just do ``Pkg.upda
     INFO: Upgrading Stats: v0.2.7 => v0.2.8
 ```
 
-The first step of updating packages is to pull new changes to ``~/.julia/v0.3/METADATA`` and see if any new registered package versions have been published.
-After this, ``Pkg.update()`` attempts to update packages that are checked out on a branch and not dirty (i.e. no changes have been made to files tracked by git) by pulling changes from the package's upstream repository.
-Upstream changes will only be applied if no merging or rebasing is necessary – i.e. if the branch can be `"fast-forwarded" <http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging>`_.
-If the branch cannot be fast-forwarded, it is assumed that you're working on it and will update the repository yourself.
+更新包的第一步是将新的改变放入 ``~/.julia/v0.3/METADATA`` 并看看是否有新的注册包版本已经被发布了。在这之后，``Pkg.update()``通过从包的上游库 pull 一些更改会更新在一个分支上被检查且不 dirty（比如，在 git 下没有对文件更改）的更新包。上游的改变仅仅在如果没有合并或重定基地址是有必要的情况下应用 - 比如，如果分支是 ["fast-forwarded"](http://git-scm.com/book/en/Git-Branching-Basic-Branching-and-Merging)。如果分支不是 fast-forwarded，就假设你正在使用它而且将自己更改仓库。 
 
-Finally, the update process recomputes an optimal set of package versions to have installed to satisfy your top-level requirements and the requirements of "fixed" packages.
-A package is considered fixed if it is one of the following:
+最后，更新的过程重新计算了一个最佳的包版本的集合来安装以满足你顶级的需求和 “fix” 包的需求。包被认为是 fixed 如果它是下面几条之一：
 
-1. **Unregistered:** the package is not in ``METADATA`` – you installed it with ``Pkg.clone``.
-2. **Checked out:** the package repo is on a development branch.
-3. **Dirty:** changes have been made to files in the repo.
+1.**未注册：**包不在 ``METADATA`` 中 - 你用 ``Pkg.clone`` 安装过它。
+2.**被检出:**包仓库在一个开发分支上。
+3.**Dirty:**在仓库中对文件进行过了修改。
 
-If any of these are the case, the package manager cannot freely change the installed version of the package, so its requirements must be satisfied by whatever other package versions it picks.
-The combination of top-level requirements in ``~/.julia/v0.3/REQUIRE`` and the requirement of fixed packages are used to determine what should be installed.
+如果这些中的任何一项出现，包管理者不能自由地更改安装好的包版本，所以它的需求必须被满足，无论它所选择的其他包版本是怎样的。在 ``~/.julia/v0.3/REQUIRE`` 中的顶层需求的组合和修改过的包的需求被用来决定应该安装什么。
 
 ## Checkout, Pin and Free
 
-
-You may want to use the ``master`` version of a package rather than one of its registered versions.
-There might be fixes or functionality on master that you need that aren't yet published in any registered versions, or you may be a developer of the package and need to make changes on ``master`` or some other development branch.
-In such cases, you can do ``Pkg.checkout(pkg)`` to checkout the ``master`` branch of ``pkg`` or ``Pkg.checkout(pkg,branch)`` to checkout some other branch::
+你可能想要使用包的 ``master`` 版本而不是注册版本中的一个。在 master 上可能有修改或功能,它们是你所需要的且没有在任何注册版本上发布，或者你可能是一个包的开发者且想要改变 ``master`` 或一些其他的开发分支。在这些例子中，你能通过 ``Pkg.checkout(pkg)``来检查 ``pkg`` 或 ``Pkg.checkout(pkg,branch)``的 ``master`` 分支以检查一些其他的分支：
 
 ```
     julia> Pkg.add("Distributions")
@@ -236,14 +201,11 @@ In such cases, you can do ``Pkg.checkout(pkg)`` to checkout the ``master`` branc
      - Stats                         0.2.7
  ```
 
-Immediately after installing ``Distributions`` with ``Pkg.add`` it is on the current most recent registered version – ``0.2.9`` at the time of writing this.
-Then after running ``Pkg.checkout("Distributions")``, you can see from the output of ``Pkg.status()`` that ``Distributions`` is on an unregistered version greater than ``0.2.9``, indicated by the "pseudo-version" number ``0.2.9+``.
+一旦在用 ``Pkg.add`` 安装 ``Distributions`` 之后，在写完的同时它就位于最新的注册版本上 - ``0.2.9``。然后在运行 ``Pkg.checkout("Distributions")``之后，你可以从 ``Pkg.status()``的输出中看到 ``Distributions`` 比起 ``0.2.9`` 在一个未注册的版本上更佳。由 “pseudo-version” 数字 ``0.2.9+`` 指示。
 
-When you checkout an unregistered version of a package, the copy of the ``REQUIRE`` file in the package repo takes precedence over any requirements registered in ``METADATA``, so it is important that developers keep this file accurate and up-to-date, reflecting the actual requirements of the current version of the package.
-If the ``REQUIRE`` file in the package repo is incorrect or missing, dependencies may be removed when the package is checked out.
-This file is also used to populate newly published versions of the package if you use the API that ``Pkg`` provides for this (described below).
+当你检查一个未注册的包版本时，包仓库中 ``REQUIRE`` 文件的副本地位高于任何其他在 ``METADATA`` 中注册的需求，所以开发者保持这个文件的正确性和及时性是很重要的，这反映了目前包版本的真正需求。如果在包仓库中的 ``REQUIRE`` 文件是不正确的或者遗失了，当包被检出时依赖性可能会被移除。这个文件也被用来填充新发布的包版本，如果你使用了 ``Pkg`` 为此提供的 API（在下面描述）。
 
-When you decide that you no longer want to have a package checked out on a branch, you can "free" it back to the control of the package manager with ``Pkg.free(pkg)``:
+当你决定你不再想要让一个包在分支上被检出，你能使用 ``Pkg`` “释放”它回到包管理者的控制之下。
 
 ```
     julia> Pkg.free("Distributions")
@@ -258,9 +220,9 @@ When you decide that you no longer want to have a package checked out on a branc
      - Stats                         0.2.7
 ```
 
-After this, since the package is on a registered version and not on a branch, its version will be updated as new registered versions of the package are published.
+在这之后，因为包是在一个注册版本之上而且不在一个分支上，它的版本将被更新作为包的注册版本被发布。
 
-If you want to pin a package at a specific version so that calling ``Pkg.update()`` won't change the version the package is on, you can use the ``Pkg.pin`` function:
+如果你想要在一个指定的版本上 pin 一个包以使调用 ``Pkg.update()``不会改变包所在的版本，你可以使用 ``Pkg.pin`` 功能：
 
 ```
     julia> Pkg.pin("Stats")
@@ -274,9 +236,7 @@ If you want to pin a package at a specific version so that calling ``Pkg.update(
      - Stats                         0.2.7              pinned.47c198b1.tmp
 ```
 
-After this, the ``Stats`` package will remain pinned at version ``0.2.7`` – or more specifically, at commit ``47c198b1``, but since versions are permanently associated a given git hash, this is the same thing.
-``Pkg.pin`` works by creating a throw-away branch for the commit you want to pin the package at and then checking that branch out.
-By default, it pins a package at the current commit, but you can choose a different version by passing a second argument:
+在这之后，``Stats`` 包将以版本 ``0.2.7`` 保持 pin 的状态 - 或者更具体地说，在提交 ``47c198b1``时，但是自从版本被永久地和一个给定的 git hash 连接后，这就一样了。``Pkg.pin`` 通过为你想要 pin 包的提交创建一个 throw-away 分支而运行。默认下，它在当前的提交下 pin 了一个包，但是你能通过传递第二个参数选择一个不同的版本：
 
 ```
     julia> Pkg.pin("Stats",v"0.2.5")
@@ -291,8 +251,7 @@ By default, it pins a package at the current commit, but you can choose a differ
      - Stats                         0.2.5              pinned.1fd0983b.tmp
 ```
 
-Now the ``Stats`` package is pinned at commit ``1fd0983b``, which corresponds to version ``0.2.5``.
-When you decide to "unpin" a package and let the package manager update it again, you can use ``Pkg.free`` like you would to move off of any branch::
+现在 ``Stats`` 包在提交 ``1fd0983b`` 时被 pin 了，它和 ``0.2.5`` 版本相一致。当你决定 “unpin” 一个包且让包管理者再一次更新它时，你可以使用 ``Pkg.free`` 就像你想要离开任何分支一样：
 
 ```
     julia> Pkg.free("Stats")
@@ -307,9 +266,6 @@ When you decide to "unpin" a package and let the package manager update it again
      - Stats                         0.2.7
 ```
 
-After this, the ``Stats`` package is managed by the package manager again, and future calls to ``Pkg.update()`` will upgrade it to newer versions when they are published.
-The throw-away ``pinned.1fd0983b.tmp`` branch remains in your local ``Stats`` repo, but since git branches are extremely lightweight, this doesn't really matter;
-if you feel like cleaning them up, you can go into the repo and delete those branches.
+Julia 的包管理者被设计以让当你有一个包需要安装时，你就可以查看它的源代码和完整的开发历史。你也可以对包做出更改，使用 git 提交它们，并能简单地作出修改和增强。相类似的，系统被设计以让如果你想要创建一个新的包，这么做最简单的方法就是在由包管理者提供的基础设施内部。
 
- [2] :Packages that aren't on branches will also be marked as dirty if you make changes in the repo, but that's a less common thing to do.
-
+[2]:不在分支上的包也将被标记为 dirty，如果你在仓库中作出改变，但是那是一件比较少见的事。
