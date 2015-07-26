@@ -50,7 +50,7 @@ foo
 bar
 ```
 
-Julia 可以用 `-p` 或 `--machinefile` 选项来开启并行模式。 `-p n` 会发起额外的 n 个工作进程，而 `--machinefile file` 会为文件 file 的每一行发起一个工作进程。 file 定义的机器，必须要能经由无密码的 ssh 访问，且每个机器上的 Julia 安装的位置应完全相同，每个机器的定义为 `[user@]host[:port] [bind_addr]` 。 `user` defaults to current user, `port` to the standard ssh port. Optionally, in case of multi-homed hosts, `bind_addr` may be used to explicitly specify an interface.
+Julia 可以用 `-p` 或 `--machinefile` 选项来开启并行模式。 `-p n` 会发起额外的 n 个工作进程，而 `--machinefile file` 会为文件 file 的每一行发起一个工作进程。 file 定义的机器，必须要能经由无密码的 ssh 访问，且每个机器上的 Julia 安装的位置应完全相同，每个机器的定义为 `[user@]host[:port] [bind_addr]` 。 `user` 默认为当前的用户，``port`` 默认为标准 ssh 端口。可选择的，万一是多网主机，``bind_addr`` 可被用来精确指定接口。
 
 如果你想让 Julia 在启动时运行一些代码，可以将代码放入 `~/.juliarc.jl` ：
 
