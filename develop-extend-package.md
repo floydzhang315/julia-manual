@@ -15,7 +15,7 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 ```
 
 ``FULL NAME`` 是你真实的全名(双引号之间允许有空格)并且 ``EMAIL`` 是你真实的邮箱地址。  
-尽管创建和发布 Julia 扩展包时使用 [GitHub](https://github.com/) 并不是必要的，然而大多数 Julia 扩展包都存在 GitHub 上并且包管理器知道如何正确地格式化源 URL，并在其他方面上顺利的使用服务。我们建议你创建一个 [免费账号](https://github.com/join) 在 GitHub 上然后做：
+尽管创建和发布 Julia 扩展包时使用 [GitHub](https://github.com/) 并不是必要的，然而大多数 Julia 扩展包都存在 GitHub 上并且包管理器知道如何正确地格式化源 URL，并在其他方面上顺利的使用服务。我们建议你创建一个[免费账号](https://github.com/join) 在 GitHub 上然后做：
 
 ```
 
@@ -23,10 +23,9 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 
 ```
 
-在这里 ``USERNAME`` 是你 GitHub 上正确的用户名。只要你做了这一点，包管理器就知道你的 GitHub 用户名然后可以配置相关事项。你还需要  [上传](https://github.com/settings/ssh) 你的SSH公钥到 GitHub 上并设置一个 [SSH 代理](http://linux.die.net/man/1/ssh-agent>) 在你的开发机器上，这样你可以最简单的推送你的修改。在将来，我们会让这个系统具有扩展性，支持更多其它的常见 git 工具例如 [BitBucket](https://bitbucket.org) 并且允许开发者选择他们所喜欢的。
+在这里 ``USERNAME`` 是你 GitHub 上正确的用户名。只要你做了这一点，包管理器就知道你的 GitHub 用户名然后可以配置相关事项。你还需要[上传](https://github.com/settings/ssh) 你的 SSH 公钥到 GitHub 上并设置一个 [SSH 代理](http://linux.die.net/man/1/ssh-agent>)在你的开发机器上，这样你可以最简单的推送你的修改。在将来，我们会让这个系统具有扩展性，支持更多其它的常见 git 工具例如 [BitBucket](https://bitbucket.org) 并且允许开发者选择他们所喜欢的。
 
 ## 生成新扩展包
-
 
 假如你想创建一个新的 Julia 扩展包，名为 ``FooBar``。首先，你需要 ``Pkg.generate(pkg,license)``，其中 ``pkg`` 是新扩展包的名字并且 ``license`` 是生成器知晓的许可的名字：  
 
@@ -72,7 +71,8 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 
 ```
 
-此时，包管理器知道 MIT "Expat" 证书用 ``"MIT"`` 表示，Simplified BSD 证书用 ``"BSD"`` 表示，2.0版本的 Apache 软件证书用 ``"ASL"`` 表示。如果你想要使用不同的证书，你可以让我们把它添加到扩展包生成器上，或者就选这三者之一然后在生成之后修改 ``~/.julia/v0.3/PACKAGE/LICENSE.md`` 文件。  
+此时，包管理器知道 MIT "Expat" 证书用 ``"MIT"`` 表示，Simplified BSD 证书用 ``"BSD"`` 表示，2.0 版本的 Apache 软件证书用 ``"ASL"`` 表示。如果你想要使用不同的证书，你可以让我们把它添加到扩展包生成器上，或者就选这三者之一然后在生成之后修改 ``~/.julia/v0.3/PACKAGE/LICENSE.md`` 文件。  
+
 如果你创建了一个 GitHub 账户并且配置了 git,``Pkg.generate`` 将会设置一个合适的源 URL 给你。它还会自动生成 ``.travis.yml`` 文件来使用 [Travis](https://travis-ci.org) 自动测试服务。你可以在 Travis website 上测试你的扩展包仓库，但是只要你做了这个它就已经开始测试了。当然，所有的默认测试是查证 ``using FooBar`` 能否在 Julia 上工作。  
 
 ## 使你的扩展包具有可用性
@@ -147,6 +147,7 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 ```
 
 由于各种各样的原因 ``Pkg.publish()`` 有时并不会成功。在那些情况下，你可能在 GitHub 上做了一个拉取请求，这并[不难](https://help.github.com/articles/creating-a-pull-request)。  
+
 只要 ``FooBar`` 扩展包的 URL 在正式 ``METADATA`` 仓库中注册，人们就知道从哪里克隆这个扩展包，但是这并没有一些注册过的版本可供下载。这意味着 ``Pkg.add("FooBar")`` 在只安装正式版本时并没有工作。``Pkg.clone("FooBar")`` 没有一个指定的 URL 指向它。此外，当他们运行 ``Pkg.update()``，他们将会得到你上传到仓库中最新版本的 ``FooBar``。当你还在修改它，在它没有成为正式版之前这是一个比较好的方式测试你的扩展包。  
 
 ## 扩展包版本号标签
@@ -192,8 +193,10 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 ```
 
 如果在你的扩展包仓库中有一个 ``REQUIRE`` 文件，它将会在你标记版本时拷贝到 ``METADATA`` 中适当的位置。扩展包开发者们需要确定他们的扩展包中的 ``REQUIRE`` 文件确实反应他们扩展包的需求，如果你使用 ``Pkg.tag`` 命令，这将自动进入你的正式版。看 [Requirements Specification](#man-package-requirements) 来了解完整格式的 ``REQUIRE``。  
-``Pkg.tag`` 命令有第二个可选参数是一个显示的版本号对象如 ``v"0.0.1"`` 或者一个标志 ``:patch``， ``:minor`` 或者 ``:major``。这会智能的添加你的扩展包的补丁、副本或者主版本号。  
-正如使用 ``Pkg.register``，这些对于 ``METADATA`` 的修改不会对其它任何人可见直到这些修改被上传。再一次使用 ``Pkg.publish()`` 命令行，它第一次使用的时候要确定每个独立的扩展包仓库已经被标记，如果它们没有被标记要提交它们，然后打开一个到 ``METADATA`` 的拉取请求：  
+
+``Pkg.tag`` 命令有第二个可选参数是一个显示的版本号对象如 ``v"0.0.1"`` 或者一个标志 ``:patch``，``:minor`` 或者 ``:major``。这会智能地添加你的扩展包的补丁、副本或者主版本号。  
+
+正如使用 ``Pkg.register``，这些对于 ``METADATA`` 的修改不会对其它任何人可见直到这些修改被上传。再一次使用 ``Pkg.publish()``命令行，它第一次使用的时候要确定每个独立的扩展包仓库已经被标记，如果它们没有被标记要提交它们，然后打开一个到 ``METADATA`` 的拉取请求：  
 
 ```
 
@@ -223,6 +226,7 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 ```
 
 为了保持提交的散列值保持一致，需要检验仓库中的 ``REQUIRE`` 文件的内容是否与在 ``METADATA`` 中的在修改之后**不**匹配；这是不可避免的。
+
 尽管当你在 ``METADATA`` 中为之前版本的扩展包修改了需求，你仍需要在当前版本的扩展包中修改 ``REQUIRE`` 文件。  
 
 ## 依赖关系
@@ -314,6 +318,7 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 ```
 
 第一个环境应用于任何系统除了 Windows ，第二个环境应用于任何 UNIX 系统除了 OS X。  
+
 运行时检查 Julia 的当前版本可以应用在内置 ``VERSION`` 变量，这是一种  ``VersionNumber``。这些代码偶尔是必要的用来跟踪在发布的 Julia 版本之间的新功能或弃用的功能。运行时检查的例子：  
 
 ```
@@ -328,5 +333,4 @@ Julia 中设有包管理器，当你安装了扩展包时，你可以看到它�
 
 ```
 
-到 `version number literals <man-version-number-literals>` 查看跟过更完整的描述细节。
-
+到 [*version number literals*](http://julia-cn.readthedocs.org/zh_CN/latest/manual/strings/#man-version-number-literals) 查看跟过更完整的描述细节。
