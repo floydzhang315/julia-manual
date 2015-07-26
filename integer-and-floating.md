@@ -8,16 +8,17 @@ Julia 提供的基础数值类型有：
 
 * **整数类型**：
 
-`Char` 原生支持 [Unicode 字符](http://zh.wikipedia.org/zh-cn/Unicode) ；详见[字符串](string-learning.md) 。
+`Char` 原生支持 [Unicode 字符](http://zh.wikipedia.org/zh-cn/Unicode) ；详见[*字符串*](string-learning.md) 。
 
 浮点数类型：
+
 |类型	|精度	|位数|
 |:------------- |:-------------|:-----|
-|Float16	|[半精度](http://en.wikipedia.org/wiki/Half-precision_floating-point_format)|	16|
-|Float32	|[单精度](http://zh.wikipedia.org/zh-cn/%E5%96%AE%E7%B2%BE%E5%BA%A6%E6%B5%AE%E9%BB%9E%E6%95%B8)|	32|
-|Float64	|[双精度](http://zh.wikipedia.org/zh-cn/%E9%9B%99%E7%B2%BE%E5%BA%A6%E6%B5%AE%E9%BB%9E%E6%95%B8)|	64|
+|`Float16`|[半精度](http://en.wikipedia.org/wiki/Half-precision_floating-point_format)|	16|
+|`Float32`|[单精度](http://zh.wikipedia.org/zh-cn/%E5%96%AE%E7%B2%BE%E5%BA%A6%E6%B5%AE%E9%BB%9E%E6%95%B8)|	32|
+|`Float64`|[双精度](http://zh.wikipedia.org/zh-cn/%E9%9B%99%E7%B2%BE%E5%BA%A6%E6%B5%AE%E9%BB%9E%E6%95%B8)|	64|
 
-另外, 对[复数和分数](complex-fraction.md)的支持建立在这些基础数据类型之上。所有的基础数据类型通过灵活用户可扩展的[类型提升系统](type-transformation.md)不需显式类型转换，就可以互相运算。
+另外, 对[*复数和分数*](complex-fraction.md)的支持建立在这些基础数据类型之上。所有的基础数据类型通过灵活用户可扩展的[*类型提升系统*](type-transformation.md)不需显式类型转换，就可以互相运算。
 
 ## 整数
 
@@ -52,7 +53,7 @@ julia> WORD_SIZE
 64
 ```
 
-另外，Julia定义了 `Int` 和 `Uint` 类型，它们分别是系统原生的有符号和无符号 整数类型的别名：
+另外，Julia 定义了 `Int` 和 `Uint` 类型，它们分别是系统原生的有符号和无符号整数类型的别名：
 
 ```
 # 32-bit system:
@@ -106,7 +107,6 @@ Uint64
 ```
 
 二进制和八进制文本：
-
 
 ```
 julia> 0b10
