@@ -4,15 +4,15 @@ Julia 中处理 [ASCII](http://zh.wikipedia.org/zh-cn/ASCII) 文本简洁高效�
 
 关于 Julia 字符串，有一些值得注意的高级特性：
 
-* `String` 是个抽象类型，不是具体类型
-* Julia 的 `Char` 类型代表单字符，是由 32 位整数表示的 Unicode 码位
-* 与 Java 中一样，字符串不可更改： `String` 对象的值不能改变。要得到不同的字符串，需要构造新的字符串
-* 概念上，字符串是从索引值映射到字符的 部分函数 ，对某些索引值，如果不是字符，会抛出异常
+* ``String`` 是个抽象类型，不是具体类型
+* Julia 的 ``Char`` 类型代表单字符，是由 32 位整数表示的 Unicode 码位
+* 与 Java 中一样，字符串不可更改：``String`` 对象的值不能改变。要得到不同的字符串，需要构造新的字符串
+* 概念上，字符串是从索引值映射到字符的*部分函数*，对某些索引值，如果不是字符，会抛出异常
 * Julia 支持全部 Unicode 字符: 文本字符通常都是 ASCII 或 [UTF-8](http://zh.wikipedia.org/zh-cn/UTF-8) 的，但也支持其它编码
 
 ## 字符
 
-`Char` 表示单个字符：它是 32 位整数，值参见 [Unicode 码位](http://zh.wikipedia.org/zh-cn/%E7%A0%81%E4%BD%8D) 。 `Char` 必须使用单引号：
+``Char`` 表示单个字符：它是 32 位整数，值参见 [Unicode 码位](http://zh.wikipedia.org/zh-cn/%E7%A0%81%E4%BD%8D) 。 ``Char`` 必须使用单引号：
 
 ```
 julia> 'x'
@@ -22,7 +22,7 @@ julia> typeof(ans)
 Char
 ```
 
-可以把 `Char` 转换为对应整数值：
+可以把 ``Char`` 转换为对应整数值：
 
 ```
 julia> int('x')
@@ -32,14 +32,14 @@ julia> typeof(ans)
 Int64
 ```
 
-在 32 位架构上， `typeof(ans)` 的类型为 `Int32` 。也可以把整数值转换为 `Char` ：
+在 32 位架构上， ``typeof(ans)`` 的类型为 ``Int32`` 。也可以把整数值转换为 ``Char`` ：
 
 ```
 julia> char(120)
 'x'
 ```
 
-并非所有的整数值都是有效的 Unicode 码位，但为了性能， `char` 一般不检查其是否有效。如果你想要确保其有效，使用 `is_valid_cha`r 函数：
+并非所有的整数值都是有效的 Unicode 码位，但为了性能， ``char`` 一般不检查其是否有效。如果你想要确保其有效，使用 ``is_valid_char`` 函数：
 
 ```
 julia> char(0x110000)
@@ -49,9 +49,9 @@ julia> is_valid_char(0x110000)
 false
 ```
 
-目前，有效的 Unicode 码位为，从 `U+00` 至 `U+d7ff` ，以及从 `U+e000` 至 `U+10ffff` 。
+目前，有效的 Unicode 码位为，从 ``U+00`` 至 ``U+d7ff``，以及从 ``U+e000`` 至 ``U+10ffff``。
 
-可以用单引号包住 `\u` 及跟着的最多四位十六进制数，或者 `\U` 及跟着的最多八位（有效的字符，最多需要六位）十六进制数，来输入 Unicode 字符：
+可以用单引号包住 ``\u`` 及跟着的最多四位十六进制数，或者 ``\U`` 及跟着的最多八位（有效的字符，最多需要六位）十六进制数，来输入 Unicode 字符：
 
 ```
 julia> '\u0'
@@ -67,7 +67,7 @@ julia> '\U10ffff'
 '\U10ffff'
 ```
 
-Julia 使用系统默认的区域和语言设置来确定，哪些字符可以被正确显示，哪些需要用 `\u` 或 `\U` 的转义来显示。除 Unicode 转义格式之外，所有 C 语言转义的输入格式 都能使：
+Julia 使用系统默认的区域和语言设置来确定，哪些字符可以被正确显示，哪些需要用 ``\u`` 或 ``\U`` 的转义来显示。除 Unicode 转义格式之外，所有 [C 语言转义的输入格式](http://en.wikipedia.org/wiki/C_syntax#Backslash_escapes)都能使：
 
 ```
 julia> int('\0')
@@ -92,7 +92,7 @@ julia> int('\xff')
 255
 ```
 
-可以对 `Cha`r 值比较大小，也可以做少量算术运算：
+可以对 ``Char`` 值比较大小，也可以做少量算术运算：
 
 ```
 julia> 'A' < 'a'
@@ -113,7 +113,7 @@ julia> 'A' + 1
 
 ## 字符串基础
 
-字符串文本应放在双引号 `"..."` 或三个双引号 `"""..."""` 中间：
+字符串文本应放在双引号 ``"..."`` 或三个双引号 ``"""..."""`` 中间：
 
 ```
 julia> str = "Hello, world.\n"
@@ -138,7 +138,7 @@ julia> str[end]
 
 Julia 中的索引都是从 1 开始的，最后一个元素的索引与字符串长度相同，都是 `n` 。
 
-在任何索引表达式中，关键词 `end` 都是最后一个索引值（由 `endof(str)` 计算得到）的缩写。可以对字符串做 `end` 算术或其它运算：
+在任何索引表达式中，关键词 ``end`` 都是最后一个索引值（由 ``endof(str)`` 计算得到）的缩写。可以对字符串做 ``end`` 算术或其它运算：
 
 ```
 julia> str[end-1]
@@ -155,7 +155,9 @@ julia> str[end/4]
 ERROR: InexactError()
  in getindex at string.jl:59
 ```
-索引小于 `1` 或者大于 `end` ，会提示错误：
+
+索引小于 1 或者大于 ``end`` ，会提示错误：
+
 ```
 julia> str[0]
 ERROR: BoundsError()
@@ -178,18 +180,18 @@ julia> str[6:6]
 ","
 ```
 
-前者是类型为 `Char` 的单个字符，后者为仅有一个字符的字符串。在 Julia 中这两者完全不同。
+前者是类型为 ``Char`` 的单个字符，后者为仅有一个字符的字符串。在 Julia 中这两者完全不同。
 
 ## Unicode 和 UTF-8
 
-Julia 完整支持 Unicode 字符和字符串。正如上文所讨论的 ，在字符文本中， Unicode码位可以由 \u 和 \U 来转义，也可以使用标准 C 的转义序列。它们都可以用来写字符串文本：
+Julia 完整支持 Unicode 字符和字符串。正如[上文所讨论的](http://julia-cn.readthedocs.org/zh_CN/latest/manual/strings/#characters) ，在字符文本中， Unicode 码位可以由 ``\u`` 和 ``\U`` 来转义，也可以使用标准 C 的转义序列。它们都可以用来写字符串文本：
 
 ```
 julia> s = "\u2200 x \u2203 y"
 "∀ x ∃ y"
 ```
 
-非 ASCII 字符串文本使用 UTF-8 编码。 UTF-8 是一种变长编码，意味着并非所有的字符的编码长度都是相同的。在 UTF-8 中，码位低于 0x80 (128) 的字符即 ASCII 字符，编码如在 ASCII 中一样，使用单字节；其余码位的字符使用多字节，每字符最多四字节。这意味着 UTF-8 字符串中，并非所有的字节索引值都是有效的字符索引值。如果索引到无效的字节索引值，会抛出错误：
+非 ASCII 字符串文本使用 UTF-8 编码。 UTF-8 是一种变长编码，意味着并非所有的字符的编码长度都是相同的。在 UTF-8 中，码位低于 ``0x80 (128)`` 的字符即 ASCII 字符，编码如在 ASCII 中一样，使用单字节；其余码位的字符使用多字节，每字符最多四字节。这意味着 UTF-8 字符串中，并非所有的字节索引值都是有效的字符索引值。如果索引到无效的字节索引值，会抛出错误：
 
 ```
 julia> s[1]
@@ -209,9 +211,9 @@ julia> s[4]
 ' '
 ```
 
-上例中，字符 `∀` 为 3 字节字符，所以索引值 2 和 3 是无效的，而下一个字符的索引值为 4。
+上例中，字符 ``∀`` 为 3 字节字符，所以索引值 2 和 3 是无效的，而下一个字符的索引值为 4。
 
-由于变长编码，字符串的字符数（由 `length(s)` 确定）不一定等于字符串的最后索引值。对字符串 `s` 进行索引，并从 1 遍历至 `endof(s)` ，如果没有抛出异常，返回的字符序列将包括 `s` 的序列。因而 `length(s) <= endof(s)` 。下面是个低效率的遍历 `s` 字符的例子：
+由于变长编码，字符串的字符数（由 ``length(s)`` 确定）不一定等于字符串的最后索引值。对字符串 ``s`` 进行索引，并从 1 遍历至 ``endof(s)`` ，如果没有抛出异常，返回的字符序列将包括 ``s`` 的序列。因而 ``length(s) <= endof(s)``。下面是个低效率的遍历 ``s`` 字符的例子：
 
 ```
 julia> for i = 1:endof(s)
@@ -245,7 +247,7 @@ x
 y
 ```
 
-Julia 不只支持 UTF-8 ，增加其它编码的支持也很简单。特别是，Julia 还提供了 utf16string 和 utf32string 类型，由 UTF16（S）和 utf32（S）函数分别支持 UTF-16 和 UTF-32 编码。它还为 UTF-16 或 UTF-32 字符串提供了别名 WString  和 wstring（S），两者的选择取决于cwchar_t大小。 有关 UTF-8 的讨论，详见下面的字节数组文本 。
+Julia 不只支持 UTF-8 ，增加其它编码的支持也很简单。特别是，Julia 还提供了 utf16string 和 utf32string 类型，由 UTF16（S）和 utf32（S）函数分别支持 UTF-16 和 UTF-32 编码。它还为 UTF-16 或 UTF-32 字符串提供了别名 WString 和 wstring（S），两者的选择取决于 cwchar_t 大小。有关 UTF-8 的讨论，详见下面的字节数组文本 。
 
 ## 内插
 
@@ -261,7 +263,9 @@ julia> whom = "world"
 julia> string(greet, ", ", whom, ".\n")
 "Hello, world.\n"
 ```
-像 Perl 一样， Julia 允许使用 $ 来内插字符串文本：
+
+像 Perl 一样， Julia 允许使用 ``$`` 来内插字符串文本：
+
 ```
 julia> "$greet, $whom.\n"
 "Hello, world.\n"
@@ -269,14 +273,14 @@ julia> "$greet, $whom.\n"
 
 系统会将其重写为字符串文本连接。
 
-`$` 将其后的最短的完整表达式内插进字符串。可以使用小括号将任意表达式内插：
+``$`` 将其后的最短的完整表达式内插进字符串。可以使用小括号将任意表达式内插：
 
 ```
 julia> "1 + 2 = $(1 + 2)"
 "1 + 2 = 3"
 ```
 
-字符串连接和内插都调用 `string` 函数来把对象转换为 `String` 。与在交互式会话中一样，大多数非 `String` 对象被转换为字符串：
+字符串连接和内插都调用 ``string`` 函数来把对象转换为 ``String`` 。与在交互式会话中一样，大多数非 ``String`` 对象被转换为字符串：
 
 ```
 julia> v = [1,2,3]
@@ -289,7 +293,7 @@ julia> "v: $v"
 "v: [1,2,3]"
 ```
 
-`Char` 值也可以被内插到字符串中：
+``Char`` 值也可以被内插到字符串中：
 
 ```
 julia> c = 'x'
@@ -299,7 +303,7 @@ julia> "hi, $c"
 "hi, x"
 ```
 
-要在字符串文本中包含 `$` 文本，应使用反斜杠将其转义：
+要在字符串文本中包含 ``$`` 文本，应使用反斜杠将其转义：
 
 ```
 julia> print("I have \$100 in my account.\n")
@@ -324,7 +328,7 @@ julia> "1 + 2 = 3" == "1 + 2 = $(1 + 2)"
 true
 ```
 
-使用 `search` 函数查找某个字符的索引值：
+使用 ``search`` 函数查找某个字符的索引值：
 
 ```
 julia> search("xylophone", 'x')
@@ -350,7 +354,7 @@ julia> search("xylophone", 'o', 8)
 0
 ```
 
-另一个好用的处理字符串的函数 repeat ：
+另一个好用的处理字符串的函数 ``repeat`` ：
 
 ```
 julia> repeat(".:Z:.", 10)
@@ -368,11 +372,11 @@ julia> repeat(".:Z:.", 10)
 
 ## 非标准字符串文本
 
-Julia 提供了[非标准字符串文本](http://julia-cn.readthedocs.org/zh_CN/latest/manual/metaprogramming/#man-non-standard-string-literals2) 。它在正常的双引号括起来的字符串文本上，添加了前缀标识符。下面将要介绍的正则表达式、字节数组文本和版本号文本，就是非标准字符串文本的例子。 [元编程](cell-code.md)章节有另外的一些例子。
+Julia 提供了[*非标准字符串文本*](http://julia-cn.readthedocs.org/zh_CN/latest/manual/metaprogramming/#man-non-standard-string-literals2) 。它在正常的双引号括起来的字符串文本上，添加了前缀标识符。下面将要介绍的正则表达式、字节数组文本和版本号文本，就是非标准字符串文本的例子。[*元编程*](cell-code.md)章节有另外的一些例子。
 
 ### 正则表达式
 
-Julia 的正则表达式 (regexp) 与 Perl 兼容，由 [PCRE](http://www.pcre.org/) 库提供。它是一种非标准字符串文本，前缀为 r ，最后面可再跟一些标识符。最基础的正则表达式仅为 `r"..."` 的形式：
+Julia 的正则表达式 (regexp) 与 Perl 兼容，由 [PCRE](http://www.pcre.org/) 库提供。它是一种非标准字符串文本，前缀为 r ，最后面可再跟一些标识符。最基础的正则表达式仅为 ``r"..."`` 的形式：
 
 ```
 julia> r"^\s*(?:#|$)"
@@ -382,7 +386,7 @@ julia> typeof(ans)
 Regex (constructor with 3 methods)
 ```
 
-检查正则表达式是否匹配字符串，使用 `ismatch` 函数：
+检查正则表达式是否匹配字符串，使用 ``ismatch`` 函数：
 
 ```
 julia> ismatch(r"^\s*(?:#|$)", "not a comment")
@@ -392,7 +396,7 @@ julia> ismatch(r"^\s*(?:#|$)", "# a comment")
 true
 ```
 
-`ismatch` 根据正则表达式是否匹配字符串，返回真或假。 match 函数可以返回匹配的具体情况：
+``ismatch`` 根据正则表达式是否匹配字符串，返回真或假。 match 函数可以返回匹配的具体情况：
 
 ```
 julia> match(r"^\s*(?:#|$)", "not a comment")
@@ -401,7 +405,7 @@ julia> match(r"^\s*(?:#|$)", "# a comment")
 RegexMatch("#")
 ```
 
-如果没有匹配， `match` 返回 `nothing` ，这个值不会在交互式会话中打印。除了不被打印，这个值完全可以在编程中正常使用：
+如果没有匹配， ``match`` 返回 ``nothing``，这个值不会在交互式会话中打印。除了不被打印，这个值完全可以在编程中正常使用：
 
 ```
 m = match(r"^\s*(?:#|$)", line)
@@ -412,7 +416,7 @@ else
 end
 ```
 
-如果匹配成功， `match` 的返回值是一个 `RegexMatch` 对象。这个对象记录正则表达式是如何匹配的，包括类型匹配的子字符串，和其他捕获的子字符串。本例中仅捕获了匹配字符串的一部分，假如我们想要注释字符后的非空白开头的文本，可以这么写：
+如果匹配成功， ``match`` 的返回值是一个 ``RegexMatch`` 对象。这个对象记录正则表达式是如何匹配的，包括类型匹配的子字符串，和其他捕获的子字符串。本例中仅捕获了匹配字符串的一部分，假如我们想要注释字符后的非空白开头的文本，可以这么写：
 
 ```
 julia> m = match(r"^\s*(?:#\s*(.*?)\s*$|$)", "# a comment ")
@@ -429,14 +433,14 @@ julia> m = match(r"[0-9]","aaaa1aaaa2aaaa3",11)
 RegexMatch("3")
 ```
 
-可以在 RegexMatch 对象中提取下列信息：
+可以在 ``RegexMatch`` 对象中提取下列信息：
 
-* 完整匹配的子字符串： `m.match`
-* 捕获的子字符串组成的字符串多元组： `m.captures`
-* 完整匹配的起始偏移值： `m.offset`
-* 捕获的子字符串的偏移值向量： `m.offsets`
+* 完整匹配的子字符串： ``m.match``
+* 捕获的子字符串组成的字符串多元组： ``m.captures``
+* 完整匹配的起始偏移值： ``m.offset``
+* 捕获的子字符串的偏移值向量： ``m.offsets``
 
-对于没匹配的捕获， m.captures 的内容不是子字符串，而是 nothing ， m.offsets 为 `0` 偏移（ Julia 中的索引值都是从 `1` 开始的，因此 `0` 偏移值表示无效）：
+对于没匹配的捕获，``m.captures`` 的内容不是子字符串，而是 ``nothing`` ，``m.offsets`` 为 0 偏移（Julia 中的索引值都是从 1 开始的，因此 0 偏移值表示无效）：
 
 ```
 julia> m = match(r"(a|b)(c)?(d)", "acd")
@@ -489,7 +493,7 @@ julia> first, second, third = m.captures; first
 "a"
 ```
 
-可以在右引号之后，使用标识符 `i, m, `s`及 `x的组合，来修改正则表达式的行为。这几个标识符的用法与 Perl 中的一样，详见 [perlre manpage](http://perldoc.perl.org/perlre.html#Modifiers) ：
+可以在右引号之后，使用标识符 ``i``,``m``, ``s``及 ``x`` 的组合，来修改正则表达式的行为。这几个标识符的用法与 Perl 中的一样，详见 [perlre manpage](http://perldoc.perl.org/perlre.html#Modifiers) ：
 
 ```
 i   不区分大小写
