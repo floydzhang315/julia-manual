@@ -49,7 +49,7 @@ julia> 안녕하세요 = "Hello"
 "Hello"
 ```
 
-在 Julia REPL 和其他几个 Julia 编辑环境中，您可以通过输入反斜杠符号名称后再输入标签来键入很多 Unicode 数学符号。例如，变量名 δ 可以通过键入 \delta 键入，甚至可以通过输入 \alpha-tab-\hat-tab-_2-tab 输入 α̂₂ 。
+在 Julia REPL 和其他几个 Julia 编辑环境中，您可以通过输入反斜杠符号名称后再输入标签来键入很多 Unicode 数学符号。例如，变量名 ``δ`` 可以通过键入 ``\delta`` 键入，甚至可以通过输入 ``\alpha`` - *tab* - ``\hat`` - *tab* - ``\_2`` - *tab* 输入 ``α̂₂`` 。
 
 Julia 甚至允许重新定义内置的常数和函数：
 
@@ -76,7 +76,7 @@ julia> sqrt = 4
 
 ## 可用的变量名
 
-变量名必须开始以字母（a-z 或 A-Z），下划线，或一个 Unicode 编码指针中指向比 00A0 更大的指针子集；特别是 [Unicode 字符 ](http://www.fileformat.info/info/unicode/category/index.htm) Lu/Ll/Lt/Lm/Lo/Nl（字母），Sc/So （货币和其他符号），和其他一些可以看做字符的一些输入（例如 Sm 数学符号的子集）是允许的。首位之后的字符也包括！和数字（0-9 和其他字符 Nd/No ），以及其他 Unicode 编码指针：变音符号和其他修改标记（字母 Mn/Mc/Me/Sk），一些标点连接器（字母 PC），素数，和其他的一些字符。
+变量名必须以字母（a-z 或 A-Z），下划线，或一个 Unicode 编码指针中指向比 00A0 更大的指针子集开始；特别是 [Unicode 字符 ](http://www.fileformat.info/info/unicode/category/index.htm) Lu/Ll/Lt/Lm/Lo/Nl（字母），Sc/So （货币和其他符号），和其他一些可以看做字符的一些输入（例如 Sm 数学符号的子集）是允许的。首位之后的字符也包括 ！和数字（0-9 和其他字符 Nd/No ），以及其他 Unicode 编码指针：变音符号和其他修改标记（字母 Mn/Mc/Me/Sk），一些标点连接器（字母 PC），素数，和其他的一些字符。
 
 运算符类似 `+` 也是有效的标识符，但需要特别解析。在某些情况下，运算符可以像变量一样使用；例如 `(+)` 是指增加功能，和 `(+) = f`  将重新定义这个运算。大多数的 Unicode 中缀操作符（在 Sm 中），如 `⊕` ，会被解析为中缀操作符，同时可以自定义方法（例如，你可以使用 `⊗ = kron` 定义 `⊕` 成为一个中缀 Kronecker 积）。
 
