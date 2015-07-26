@@ -165,11 +165,12 @@ true
 
 为了减小溢出所带来的影响，整数加减法、乘法、指数运算都会把原先范围较小的整数类型提升到 `Int` 或 `Uint` 类型。（除法、求余、位运算则不提升类型）。
 
-**Division errors**
+**除法错误**
 
-Integer division (the div function) has two exceptional cases: dividing by zero, and dividing the lowest negative number (typemin) by -1. Both of these cases throw a DivideError. The remainder and modulus functions (rem and mod) throw a DivideError when their second argument is zero.
+整数除法（``div`` 功能）有两个额外的样例：被 0 除，和被最低的负数（``typemin``）-1 除。两个例子都抛出了一个 ``DivideError``。余数和模运算（``rem`` 和 ``mod``）当它们的第二个参数为 0 时，抛出了一个 ``DivideError``。
 
 **浮点数**
+
 使用标准格式来表示文本化的浮点数：
 
 ```
@@ -246,7 +247,7 @@ julia> 2*float16(4.)
 
 ## 浮点数类型的零
 
-浮点数类型中存在[两个零](http://zh.wikipedia.org/zh-cn/%E2%88%920) ，正数的 零和负数的零。它们相等，但有着不同的二进制表示，可以使用`bits`函数看出：
+浮点数类型中存在[两个零](http://zh.wikipedia.org/zh-cn/%E2%88%920) ，正数的 零和负数的零。它们相等，但有着不同的二进制表示，可以使用 `bits` 函数看出：
 
 ```
 julia> 0.0 == -0.0
@@ -262,8 +263,6 @@ julia> bits(-0.0)
 ### 特殊的浮点数
 
 有三个特殊的标准浮点数：
-
-
 
 <table border=”1″>
 <tr>
@@ -301,7 +300,7 @@ julia> bits(-0.0)
 </tr>
 </table>
 
-详见[数值比较](operation-function.md) 。按照 [IEEE 754 标准](http://zh.wikipedia.org/zh-cn/IEEE_754) ，这几个值可如下获得：
+详见[*数值比较*](operation-function.md) 。按照 [IEEE 754 标准](http://zh.wikipedia.org/zh-cn/IEEE_754) ，这几个值可如下获得：
 
 ```
 julia> 1/Inf
@@ -371,7 +370,7 @@ julia> eps() # same as eps(Float64)
 2.220446049250313e-16
 ```
 
-`eps` 函数也可以取浮点数作为参数，给出这个值和下一个可表示的浮点数的绝对差，即， `eps(x)` 的结果与 `x` 同类型，且满足 `x + eps(x)` 是下一个比 `x` 稍大的、可表示的浮点数：
+`eps` 函数也可以取浮点数作为参数，给出这个值和下一个可表示的浮点数的绝对差，即，`eps(x)` 的结果与 `x` 同类型，且满足 `x + eps(x)` 是下一个比 `x` 稍大的、可表示的浮点数：
 
 ```
 julia> eps(1.0)
@@ -415,7 +414,7 @@ julia> bits(nextfloat(x))
 
 ### 舍入模型
 
-如果一个数没有精确的浮点数表示，那就需要舍入了。可以根据[IEEE 754](http://en.wikipedia.org/wiki/IEEE_754-2008)标准 来更改舍入的模型：
+如果一个数没有精确的浮点数表示，那就需要舍入了。可以根据 [IEEE 754](http://en.wikipedia.org/wiki/IEEE_754-2008) 标准 来更改舍入的模型：
 
 ```
 julia> 1.1 + 0.1
@@ -433,11 +432,11 @@ julia> with_rounding(Float64,RoundDown) do
 
 浮点数的算术运算同人们的预期存在着许多差异，特别是对不了解底层实现的人。许多科学计算的书籍都会详细的解释这些差异。下面是一些参考资料：
 
-关于浮点数算数运算最权威的指南是 [IEEE 754-2008](http://standards.ieee.org/findstds/standard/754-2008.html) 标准 ；然而，该指南没有免费的网络版
-一个简短但是清晰地解释了浮点数是怎么表示的, 请参考 John D. Cook 的[文章](http://www.johndcook.com/blog/2009/04/06/anatomy-of-a-floating-point-number/) 。它还[简述](http://www.johndcook.com/blog/2009/04/06/numbers-are-a-leaky-abstraction/)了由于浮点数的表示方法不同于理想的实数会带来怎样的问题
-推荐 Bruce Dawson 的[关于浮点数的博客](http://randomascii.wordpress.com/2012/05/20/thats-not-normalthe-performance-of-odd-floats/)
-David Goldberg 的[每个计算机科学家都需要了解的浮点数算术计算](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.102.244&rep=rep1&type=pdf)，是一篇非常精彩的文章， 深入讨论了浮点数和浮点数的精度问题
-更深入的文档, 请参考 “浮点数之父”[William Kahan](http://en.wikipedia.org/wiki/William_Kahan) 的 [collected writings](http://www.cs.berkeley.edu/~wkahan/) ，其中详细记录了浮点数的历史、理论依据、问题，还有其它很多的数值计算方面的内容。更有兴趣的可以读[采访浮点数之父](http://www.cs.berkeley.edu/~wkahan/ieee754status/754story.html)
+* 关于浮点数算数运算最权威的指南是 [IEEE 754-2008](http://standards.ieee.org/findstds/standard/754-2008.html) 标准 ；然而，该指南没有免费的网络版
+* 一个简短但是清晰地解释了浮点数是怎么表示的, 请参考 John D. Cook 的[文章](http://www.johndcook.com/blog/2009/04/06/anatomy-of-a-floating-point-number/) 。它还[简述](http://www.johndcook.com/blog/2009/04/06/numbers-are-a-leaky-abstraction/)了由于浮点数的表示方法不同于理想的实数会带来怎样的问题
+* 推荐 Bruce Dawson 的[关于浮点数的博客](http://randomascii.wordpress.com/2012/05/20/thats-not-normalthe-performance-of-odd-floats/)
+* David Goldberg 的[每个计算机科学家都需要了解的浮点数算术计算](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.102.244&rep=rep1&type=pdf)，是一篇非常精彩的文章， 深入讨论了浮点数和浮点数的精度问题
+* 更深入的文档, 请参考“浮点数之父”[William Kahan](http://en.wikipedia.org/wiki/William_Kahan) 的 [collected writings](http://www.cs.berkeley.edu/~wkahan/) ，其中详细记录了浮点数的历史、理论依据、问题，还有其它很多的数值计算方面的内容。更有兴趣的可以读[采访浮点数之父](http://www.cs.berkeley.edu/~wkahan/ieee754status/754story.html)
 
 ## 任意精度的算术
 
@@ -445,10 +444,10 @@ David Goldberg 的[每个计算机科学家都需要了解的浮点数算术计�
 
 可以通过基础数值类型或 `String` 类型来构造：
 
+```
 julia> BigInt(typemax(Int64)) + 1
 9223372036854775808
 
-```
 julia> BigInt("123456789012345678901234567890") + 1
 123456789012345678901234567891
 
@@ -461,7 +460,9 @@ julia> BigFloat(2.0^66) / 3
 julia> factorial(BigInt(40))
 815915283247897734345611269596115894272000000000
 ```
+
 然而，基础数据类型和 BigInt/BigFloat 不能自动进行类型转换，需要明确指定：
+
 ```
 julia> x = typemin(Int64)
 -9223372036854775808
@@ -482,7 +483,7 @@ julia> typeof(y)
 BigInt (constructor with 10 methods)
 ```
 
-BigFloat 运算的默认精度（有效数字的位数）和舍入模型，是可以改的。然后，计算就都按照更改之后的设置来运行了：
+*BigFloat* 运算的默认精度（有效数字的位数）和舍入模型，是可以改的。然后，计算就都按照更改之后的设置来运行了：
 
 ```
 julia> with_rounding(BigFloat,RoundUp) do
@@ -558,12 +559,13 @@ ERROR: type: apply: expected Function, got Int64
 文本因子与两个数值表达式语法冲突: 十六进制整数文本和浮点数文本的科学计数法：
 
 * 十六进制整数文本表达式 `0xff` 可以被解析为数值文本 `0` 乘以变量 `xff`
-* 浮点数文本表达式 `1e10` 可以被解析为数值文本 `1` 乘以变量 `e10` 。 `E` 格式也同样。
+* 浮点数文本表达式 `1e10` 可以被解析为数值文本 `1` 乘以变量 `e10` 。`E` 格式也同样。
+
 这两种情况下，我们都把表达式解析为数值文本：
 
 * 以 `0x` 开头的表达式，都被解析为十六进制文本
 * 以数字文本开头，后面跟着 `e` 或 `E` ，都被解析为浮点数文本
-* 
+
 ## 零和一
 
 Julia 提供了一些函数, 用以得到特定数据类型的零和一文本。
@@ -571,7 +573,8 @@ Julia 提供了一些函数, 用以得到特定数据类型的零和一文本。
 |函数|	说明|
 |:---|:----|
 |`zero(x)`	|类型 `x` 或变量 `x` 的类型下的文本零|
-|`one(x`)	|类型 `x` 或变量 `x` 的类型下的文本一|
+|`one(x`)`	|类型 `x` 或变量 `x` 的类型下的文本一|
+
 这俩函数在[数值比较](http://julia-cn.readthedocs.org/zh_CN/latest/manual/mathematical-operations/#man-numeric-comparisons)中可用来避免额外的[类型转换 ](http://julia-cn.readthedocs.org/zh_CN/latest/manual/conversion-and-promotion/#man-conversion-and-promotion)。
 
 例如：
