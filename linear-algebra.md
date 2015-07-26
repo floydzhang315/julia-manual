@@ -1,48 +1,43 @@
 # 线性代数 
 
-
 ## 矩阵分解
-
 
 [矩阵分解](http://zh.wikipedia.org/zh-cn/%E7%9F%A9%E9%98%B5%E5%88%86%E8%A7%A3)是将一个矩阵分解为数个矩阵的乘积，是线性代数中的一个核心概念。
 
-下面的表格总结了在 Julia 中实现的几种矩阵分解方式。具体的函数可以参考标准库文档的 [Linear Algebra](http://julia-cn.readthedocs.org/zh_CN/latest/stdlib/linalg/#stdlib-linalg)章节。
+下面的表格总结了在 Julia 中实现的几种矩阵分解方式。具体的函数可以参考标准库文档的 [*Linear Algebra*](http://julia-cn.readthedocs.org/zh_CN/latest/stdlib/linalg/#stdlib-linalg)章节。
 
-
-|Cholesky	|Cholesky 分解|
+|||
 |:----|:----|
-|CholeskyPivoted|	主元 Cholesky 分解|
-|LU |	LU 分解|
+|Cholesky	|[Cholesky 分解](http://en.wikipedia.org/wiki/Cholesky_decomposition)|
+|CholeskyPivoted|	[主元](http://zh.wikipedia.org/zh-cn/%E4%B8%BB%E5%85%83) Cholesky 分解|
+|LU |	[LU 分解](http://zh.wikipedia.org/zh-cn/LU%E5%88%86%E8%A7%A3)|
 |LUTridiagonal |三对角矩阵的 LU 因子分解|
 |UmfpackLU	|稀疏矩阵的 LU 分解（使用 UMFPACK 计算）|
-|QR	|QR 分解|
-|QRCompactWY	|QR 分解的紧凑WY形式|
-|QRPivoted	|主元 QR 分解|
-|Hessenberg	|Hessenberg 分解|
-|Eigen|	特征分解|
-|SVD	|奇异值分解|
-|GeneralizedSVD|	广义奇异值分解|
-
+|QR	|[QR 分解](http://zh.wikipedia.org/zh-cn/LU%E5%88%86%E8%A7%A3)|
+|QRCompactWY	|QR 分解的紧凑 WY 形式|
+|QRPivoted	|主元 [QR 分解](http://zh.wikipedia.org/zh-cn/QR%E5%88%86%E8%A7%A3)|
+|Hessenberg	|[Hessenberg 分解](http://mathworld.wolfram.com/HessenbergDecomposition.html)|
+|Eigen|	[特征分解](http://zh.wikipedia.org/zh-cn/%E7%89%B9%E5%BE%81%E5%88%86%E8%A7%A3)|
+|SVD	|[奇异值分解](http://zh.wikipedia.org/zh-cn/%E5%A5%87%E5%BC%82%E5%80%BC%E5%88%86%E8%A7%A3)|
+|GeneralizedSVD|[广义奇异值分解](http://en.wikipedia.org/wiki/Generalized_singular_value_decomposition#Higher_order_version)|
 
 ## 特殊矩阵
 
-
-线性代数中经常碰到带有对称性结构的特殊矩阵，这些矩阵经常和矩阵分解联系到一起。 Julia 内置了非常丰富的特殊矩阵类型，可以快速地对特殊矩阵进行特定的操作.
+线性代数中经常碰到带有对称性结构的特殊矩阵，这些矩阵经常和矩阵分解联系到一起。Julia 内置了非常丰富的特殊矩阵类型，可以快速地对特殊矩阵进行特定的操作.
 
 下面的表格总结了 Julia 中特殊的矩阵类型，其中也包含了 LAPACK 中的一些已经优化过的运算。
 
-|Hermitian	|埃尔米特矩阵|
+|||
 |:-----|:-----|
-|Triangular	|上/下 三角矩阵|
-|Tridiagonal	|三对角矩阵|
+|Hermitian	|[埃尔米特矩阵](http://zh.wikipedia.org/zh-cn/%E5%9F%83%E5%B0%94%E7%B1%B3%E7%89%B9%E7%9F%A9%E9%98%B5)|
+|Triangular	|上/下[三角矩阵](http://zh.wikipedia.org/zh-cn/%E4%B8%89%E8%A7%92%E7%9F%A9%E9%98%B5)|
+|Tridiagonal	|[三对角矩阵](http://zh.wikipedia.org/zh-cn/%E4%B8%89%E5%AF%B9%E8%A7%92%E7%9F%A9%E9%98%B5)|
 |SymTridiagonal	|对称三对角矩|
-|Bidiagonal	|上/下 双对角矩阵|
-|Diagonal	|对角矩阵|
-|UniformScaling	|缩放矩阵|
-
+|Bidiagonal	|上/下[双对角矩阵](http://en.wikipedia.org/wiki/Bidiagonal_matrix)|
+|Diagonal	|[对角矩阵](http://zh.wikipedia.org/zh-cn/%E5%B0%8D%E8%A7%92%E7%9F%A9%E9%99%A3)|
+|UniformScaling	|[缩放矩阵](http://zh.wikipedia.org/zh-cn/%E7%BC%A9%E6%94%BE)|
 
 ## 基本运算
-
 
 |矩阵类型	|+|	-|	*|	\ |	其它已优化的函数|
 |:--|:--|:---|:---|:--|:-|
@@ -54,8 +49,8 @@
 |Diagnoal	|X	|X	|XY|	XY|	inv, det, logdet, /|
 |UniformScaling|	X|	X|	XYZ|	XYZ|	/|
 
-
 图例：
+
 |X|已对矩阵-矩阵运算优化|
 |:--|:--|
 |Y	|已对矩阵-向量运算优化|
@@ -63,9 +58,7 @@
 
 ## 矩阵分解
 
-
-
-|矩阵类型	|LAPACK|	eig	|eigvals|	eigvecs	|svd	|svdvals|
+|**矩阵类型**	|**LAPACK**|	eig	|eigvals|	eigvecs	|svd	|svdvals|
 |:--|:--|:---|:---|:--|:-|
 |Hermitian	|HE|	 	ABC	 	 	 |
 |Triangular	|TR	 	 	 	 	 |
@@ -82,6 +75,6 @@
 |C|	已对寻找在 [vl, vh] 之间的特征值优化	|eigvals(M, vl, vh)|
 |D|	已对寻找特征值 x=[x1, x2,...] 所对应的特征向量优化	|eigvecs(M, x)|
 
-缩放运算
---------
-一个 ``UniformScaling`` 运算符代表了一个单位算子的标量次数, ``λ*I``。 单位算子 ``I`` 被定义为一个常量且是 ``UniformScaling`` 的一个实例。 这些运算符的尺寸是一般大小，可匹配  ``+``,``-``,``*`` 和 ``\`` 等其它二元运算符中的矩阵。 对于 ``A+I`` 和 ``A-I`` 这意味着 ``A`` 必须是一个方阵. 使用了单位算子``I`` 的乘法运算是一个空操作(除非缩放因子为一) ，因此基本没有开销。
+## 缩放运算
+
+一个 ``UniformScaling`` 运算符代表了一个单位算子的标量次数, ``λ*I``。单位算子 ``I`` 被定义为一个常量且是 ``UniformScaling`` 的一个实例。 这些运算符的尺寸是一般大小，可匹配  ``+``,``-``,``*`` 和 ``\`` 等其它二元运算符中的矩阵。对于 ``A+I`` 和 ``A-I`` 这意味着 ``A`` 必须是一个方阵. 使用了单位算子 ``I`` 的乘法运算是一个空操作(除非缩放因子为一) ，因此基本没有开销。
