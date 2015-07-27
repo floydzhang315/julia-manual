@@ -179,10 +179,10 @@ Julia 没有 MATLAB 的 ``clear`` 函数；在 Julia 会话（准确来说， ``
     0.03125
 
 
-###Why does Julia use native machine integer arithmetic?
+### Julia 为什么使用本机整数运算？
 
 
-Julia uses machine arithmetic for integer computations. This means that the range of ``Int`` values is bounded and wraps around at either end so that adding, subtracting and multiplying integers can overflow or underflow, leading to some results that can be unsettling at first:
+Julia 会应用机器运算的整数计算。这意味着 int 值的范围是有界的，是在两界之间取值的，所以添加，减去，乘以和除以一个整数都可能导致上溢或下溢，这可能会导致一些不好的后果，这种情况在一开始会让人感到很不安。
 
     julia> typemax(Int)
     9223372036854775807
@@ -196,29 +196,13 @@ Julia uses machine arithmetic for integer computations. This means that the rang
     julia> 2*ans
     0
 
-Clearly, this is far from the way mathematical integers behave, and you might
-think it less than ideal for a high-level programming language to expose this
-to the user. For numerical work where efficiency and transparency are at a
-premium, however, the alternatives are worse.
+显然，这远远不能用数学的方法来表现，您可能会认为 Julia 与一些高级编程语言会公开给用户这一情况相比来说不是那么理想。然而这对于效率和透明度都非常珍贵的数值工作来说，相比之下，替代品更是糟糕。
 
-One alternative to consider would be to check each integer operation for
-overflow and promote results to bigger integer types such as ``Int128`` or
-``BigInt`` in the case of overflow. Unfortunately, this introduces major
-overhead on every integer operation (think incrementing a loop counter) – it
-requires emitting code to perform run-time overflow checks after arithmetic
-instructions and braches to handle potential overflows. Worse still, this
-would cause every computation involving integers to be type-unstable. As we
-mentioned above, `type-stability is crucial <#man-type-stable>`_ for effective
-generation of efficient code. If you can't count on the results of integer
-operations being integers, it's impossible to generate fast, simple code the
-way C and Fortran compilers do.
+这里有一个选择是为了溢出情况来检查每个整数操作，并且由于溢出情况而提高结果值到大一些的整数类型，例如 Int128 或 BigInt。不幸的是，这就引进了在每个整数操作上都会有的主要负担（想想增加一个循环计数器）。-这需要发射代码在算术指令后执行程序时的溢出检查，并且需要一些分支来解决潜在溢出问题。更糟糕的是，这会导致每一个计算，在涉及整数时都是不稳定的。正如我们上面提到的，![类型的稳定性](http://julia-cn.readthedocs.org/zh_CN/latest/manual/faq/#man-type-stable)是有效的代码生成的关键。如果您不能指望整数运算的结果是整数，那么按 C 和 Fortran 编译器方式做的简单代码，想要生成速度快是不可能的。
 
-A variation on this approach, which avoids the appearance of type instabilty is to merge the ``Int`` and ``BigInt`` types into a single hybrid integer type, that internally changes representation when a result no longer fits into the size of a machine integer. While this superficially avoids type-instability at the level of Julia code, it just sweeps the problem under the rug by foisting all of the same difficulties onto the C code implementing this hybrid integer type. This approach *can* be made to work and can even be made quite fast in many cases, but has several drawbacks. One problem is that the in-memory representation of integers and arrays of integers no longer match the natural representation used by C, Fortran and other languages with native machine integers. Thus, to interoperate with those languages, we would ultimately need to introduce native integer types anyway. Any unbounded representation of integers cannot have a fixed number of bits, and thus cannot be stored inline in an array with fixed-size slots – large integer values will always require separate heap-allocated storage. And of course, no matter how clever a hybrid integer implementation one uses, there are always performance traps – situations where performance degrades unexpectedly. Complex representation, lack of interoperability with C and Fortran, the inability to represent integer arrays without additional heap storage, and unpredictable performance characteristics make even the cleverest hybrid integer implementations a poor choice for high-performance numerical work.
+这个方法还有一个可以避免不稳定类型外观的变化，就是把 Int 和 BigInt 合并成一个单一的混合整数类型，当结果不再适合机器整数的大小时，可以由内部改变来表示。然而这只是表面上解决了 Julia 语言的不稳定性水平问题，它也仅仅只是通过强硬地把所有相同的难题汇于 C 语言，使混合整数类型可以成功实现的方式，解决了几个小问题而已。这种方法基本上可以进行工作，甚至可以在许多情况下可以作出相当快的反应，但是还是有几个缺点的。其中一个问题是，在内存中整数和整数数组的表示方法，不再和 C， Fortran 等其它具有本地机器整数的语言的本地表示方法一一对应了。因此，对这些语言进行互操作，我们无论如何最终都需要引入本地的整数类型。任何无界表示的整数都没有一个固定的位，因此它们不能内联地被存储在有固定大小的槽的数组里，较大的整数的值会一直需要单独的堆分配来进行存储。当然，不管一个混合整数的实现有多精妙，总会有性能陷阱的情况或是性能下降的情况。复杂的表示的话，缺乏与 C 和 Fortran 语言的互操作性，不能代表没有额外堆存储的整数数组，并且不可预知的性能特点使即使最精妙的混合整数来实现高性能计算的工作不管怎样都不是个好办法。
 
-An alternative to using hybrid integers or promoting to BigInts is to use
-saturating integer arithmetic, where adding to the largest integer value
-leaves it unchanged and likewise for subtracting from the smallest integer
-value. This is precisely what Matlab™ does::
+还有一个在使用混合整数或是使其提高到 BigInts 的选择是用饱和的整数运算实现的，这个运算使即使把一个数添加到最大的整数值，值也不会变，同样的，从最小的整数值减去数值，值也不变。这恰恰就是 Matlab™ 可以实现的。
 
     >> int64(9223372036854775807)
 
@@ -244,7 +228,7 @@ value. This is precisely what Matlab™ does::
 
      -9223372036854775808
 
-At first blush, this seems reasonable enough since 9223372036854775807 is much closer to 9223372036854775808 than -9223372036854775808 is and integers are still represented with a fixed size in a natural way that is compatible with C and Fortran. Saturated integer arithmetic, however, is deeply problematic. The first and most obvious issue is that this is not the way machine integer arithmetic works, so implementing saturated operations requires emiting instructions after each machine integer operation to check for underflow or overflow and replace the result with ``typemin(Int)`` or ``typemax(Int)`` as appropriate. This alone expands each integer operation from a single, fast instruction into half a dozen instructions, probably including branches. Ouch. But it gets worse – saturating integer arithmetic isn't associative. Consider this Matlab computation::
+乍一看，这似乎很合理,因为 922337203685477580 是比 -922337203685477580 更要接近922337203685477580 的，并且整数还是表现在一种用 C 语言和 Fortran 语言兼容的固定大小实现的本地的方式。然而，饱和的整数运算，是非常有问题的。首先的和最明显的问题是，它不是机器的整数算术操作方式，所以每台机器进行整数运算来检查下溢或上溢，并且用 typemin（int） 或 typemax（int） 适当地取代结果之后，才可以实现发出饱和操作需要发出的指令。这就单独将每一个整数运算从一个单一的、快速的指令扩展到 6 个指令，还可能包括分支。但它会变得更糟–饱和的整数算术并不是联想的。来考虑这个 MATLAB 计算：
 
     >> n = int64(2)^62
     4611686018427387904
@@ -255,10 +239,7 @@ At first blush, this seems reasonable enough since 9223372036854775807 is much c
     >> (n + n) - 1
     9223372036854775806
 
-This makes it hard to write many basic integer algorithms since a lot of
-common techniques depend on the fact that machine addition with overflow *is*
-associative. Consider finding the midpoint between integer values ``lo`` and
-``hi`` in Julia using the expression ``(lo + hi) >>> 1``:
+这使得它很难写很多基本的整数算法，因为很多常见的技术依赖于这样一个事实，即机器加成与溢出是联想的。考虑在 Julia 中利用 (lo + hi) >>> 1 表达式来找到整数值 lo 和 hi 的中间点：
 
     julia> n = 2^62
     4611686018427387904
@@ -266,8 +247,8 @@ associative. Consider finding the midpoint between integer values ``lo`` and
     julia> (n + 2n) >>> 1
     6917529027641081856
 
-See? No problem. That's the correct midpoint between 2^62 and 2^63, despite
-the fact that ``n + 2n`` is -4611686018427387904. Now try it in Matlab:
+`
+看见了吗？没有问题。这是 2^62 和 2^63 之间正确的中点，尽管 n＋2n 实际应是 - 461168601842738790。现在尝试在MATLAB中：
 
     >> (n + 2*n)/2
 
@@ -275,16 +256,9 @@ the fact that ``n + 2n`` is -4611686018427387904. Now try it in Matlab:
 
       4611686018427387904
 
-Oops. Adding a ``>>>`` operator to Matlab wouldn't help, because saturation
-that occurs when adding ``n`` and ``2n`` has already destroyed the information
-necessary to compute the correct midpoint.
+这就出错了。添加一个  a >>> 运算元到 Matlab 上并不会有帮助。因为添加 n 和 2n 已经破坏了必要的计算正确的中点的信息时，饱和就发生了。
 
-Not only is lack of associativity unfortunate for programmers who cannot rely
-it for techniques like this, but it also defeats almost anything compilers
-might want to do to optimize integer arithmetic. For example, since Julia
-integers use normal machine integer arithmetic, LLVM is free to aggressively
-optimize simple little functions like ``f(k) = 5k-1``. The machine code for
-this function is just this:
+这不仅是程序员缺乏结合性而不幸不能依赖这样的技术,而且还打败几乎任何编译器可能想做的优化整数运算。例如，由于 Julia 的整数使用正常的机器整数运算，LLVM 是自由的积极简单的优化小函数如 f（k）= 5k-1。这个函数的机器码就是这样的：
 
     julia> code_native(f,(Int,))
         .section    __TEXT,__text,regular,pure_instructions
@@ -297,9 +271,8 @@ this function is just this:
         pop RBP
         ret
 
-The actual body of the function is a single ``lea`` instruction, which
-computes the integer multiply and add at once. This is even more beneficial
-when ``f`` gets inlined into another function::
+
+函数的实际体是一个单一的 lea 指令，计算整数时立刻进行乘，加运算。当 f 被嵌入另一个函数时，更加有利处：
 
     julia> function g(k,n)
              for i = 1:n
@@ -329,9 +302,7 @@ when ``f`` gets inlined into another function::
         pop RBP
         ret
 
-Since the call to ``f`` gets inlined, the loop body ends up being just a
-single ``lea`` instruction. Next, consider what happens if we make the number
-of loop iterations fixed::
+由于 f 调用被内联，循环体的结束时只是一个单一的 lea 指令。接下来，如果我们使循环迭代次数固定，我们可以来考虑发生了什么：
 
     julia> function g(k)
              for i = 1:10
@@ -354,32 +325,15 @@ of loop iterations fixed::
         pop RBP
         ret
 
-Because the compiler knows that integer addition and multiplication are
-associative and that multiplication distributes over addition – neither of
-which is true of saturating arithmetic – it can optimize the entire loop down
-to just a multiply and an add. Saturated arithmetic completely defeats this
-kind of optimization since associativity and distributivity can fail at each
-loop iteration, causing different outcomes depending on which iteration the
-failure occurs in. The compiler can unroll the loop, but it cannot
-algebraically reduce multiple operations into fewer equivalent operations.
+因为编译器知道整数的加法和乘法之间的联系并且乘法分配时优先级会高于除法–这两者都是真正的饱和运算–它们可以优化整个回路使之只留下来的只是乘法和加法。饱和算法完全地打败了这种最优化，这是因为结合性和分配性在每次在循环迭代都可能会失败，而所导致的不同后果取决于在哪次迭代会失败。
 
-Saturated integer arithmetic is just one example of a really poor choice of
-language semantics that completely prevents effective performance
-optimization. There are many things that are difficult about C programming,
-but integer overflow is *not* one of them – especially on 64-bit systems. If
-my integers really might get bigger than 2^63-1, I can easily predict that. Am
-I looping over a number of actual things that are stored in the computer? Then
-it's not going to get that big. This is guaranteed, since I don't have that
-much memory. Am I counting things that occur in the real world? Unless they're
-grains of sand or atoms in the universe, 2^63-1 is going to be plenty big. Am
-I computing a factorial? Then sure, they might get that big – I should use a
-``BigInt``. See? Easy to distinguish.
+饱和整数算法只是一个真的很差的语言语义学选择的例子，它可以阻止所有有效的性能优化。在 C 语言编程中有很多事情是很难的，但整数溢出并不是其中之一，特别是在64位系统中。比如如果我用的整数可能会变得比 2^63-1 还要大，我可以很容易地预测到。您要问自己我是在遍历存储在计算机中的实际的东西么？之后我就可以确认数是不会变得那么大的。这点是可以保证的，因为我没那么大的存储空间。我是真的在数实际真实存在的东西么？除非它们是宇宙中的沙子或原子粒，否则2^63-1 已经足够大了。我是在计算阶乘么？之后就可以确认，它们可能变得特别大-我就应该用 BigInt 了。看懂了么？区分起来是很简单的。
 
 
 
-###How do "abstract" or ambiguous fields in types interact with the compiler?
+### 类型的“抽象的”或者不明确的域如何与编译器进行交互？
 
-Types can be declared without specifying the types of their fields:
+类型可以在不指定字段的类型的情况下声明：
 
 
 
@@ -387,12 +341,7 @@ Types can be declared without specifying the types of their fields:
                a
            end
 
-This allows ``a`` to be of any type. This can often be useful, but it
-does have a downside: for objects of type ``MyAmbiguousType``, the
-compiler will not be able to generate high-performance code.  The
-reason is that the compiler uses the types of objects, not their
-values, to determine how to build code. Unfortunately, very little can
-be inferred about an object of type ``MyAmbiguousType``:
+这允许 `a` 是任何类型。这通常是非常有用的，但它有一个缺点：对于 `MyAmbiguousType` 类型的对象，编译器将无法生成高效的代码。原因是编译器使用对象的类型而不是值来决定如何构建代码。不幸的是，`MyAmbiguousType` 类型只能推断出很少的信息：
 
 
 
@@ -408,34 +357,21 @@ be inferred about an object of type ``MyAmbiguousType``:
     julia> typeof(c)
     MyAmbiguousType (constructor with 1 method)
 
-``b`` and ``c`` have the same type, yet their underlying
-representation of data in memory is very different. Even if you stored
-just numeric values in field ``a``, the fact that the memory
-representation of a ``Uint8`` differs from a ``Float64`` also means
-that the CPU needs to handle them using two different kinds of
-instructions.  Since the required information is not available in the
-type, such decisions have to be made at run-time. This slows
-performance.
-
-You can do better by declaring the type of ``a``. Here, we are focused
-on the case where ``a`` might be any one of several types, in which
-case the natural solution is to use parameters. For example:
-
-
+`b` 和 `c` 有着相同的类型，但是它们在内存中数据的基础表示是非常不同的。即使您只在 `a` 的域中储存数值，事实上 `Uint8` 和 `Float64` 的内存表示不同也意味着 CPU 需要用两种不同的指令来处理它们。由于类型中的所需信息是不可用，于是这样的决定不得不在运行时作出。这减缓了性能。
+您可以用声明 `a` 的类型的方法做得更好。在这里，我们注意到这样一种情况，就是 `a` 可能是几个类型中的任意一种，在这种情况下自然的解决办法是使用参数。例如：
 
     julia> type MyType{T<:FloatingPoint}
              a::T
            end
 
-This is a better choice than
+这相对以下代码是一个更好的选择
 
 
     julia> type MyStillAmbiguousType
              a::FloatingPoint
            end
 
-because the first version specifies the type of ``a`` from the type of
-the wrapper object.  For example:
+因为第一个版本指定了包装对象的类型。例如：
 
 
 
@@ -451,9 +387,8 @@ the wrapper object.  For example:
     julia> typeof(t)
     MyStillAmbiguousType (constructor with 2 methods)
 
-The type of field ``a`` can be readily determined from the type of
-``m``, but not from the type of ``t``.  Indeed, in ``t`` it's possible
-to change the type of field ``a``:
+
+`a` 的域的类型可以轻而易举的由 `m` 的类型确定，但不是从 `t` 的类型确定。事实上，在 `t` 中是可以改变 `a` 的域的类型的：
 
 
     julia> typeof(t.a)
@@ -465,8 +400,8 @@ to change the type of field ``a``:
     julia> typeof(t.a)
     Float32
 
-In contrast, once ``m`` is constructed, the type of ``m.a`` cannot
-change:
+
+相反，一旦 `m` 被构造，`m.a` 的类型就不能改变了：
 
 
     julia> m.a = 4.5f0
@@ -475,14 +410,10 @@ change:
     julia> typeof(m.a)
     Float64
 
-The fact that the type of ``m.a`` is known from ``m``'s type---coupled
-with the fact that its type cannot change mid-function---allows the
-compiler to generate highly-optimized code for objects like ``m`` but
-not for objects like ``t``.
+`a` 的类型可以从 `m` 的类型知道的事实和 `m.a` 的类型不能在函数中修改的事实允许编译器为像 `m` 那样的类而不是像 `t` 那样的类生成高度优化的代码。
 
-Of course, all of this is true only if we construct ``m`` with a
-concrete type.  We can break this by explicitly constructing it with
-an abstract type:
+当然，只有当我们用具体类型来构造 `m` 时，这一切才是真实的。我们可以通过明确地用抽象类构造它的方法来打破之一点：
+
 
 
     julia> m = MyType{FloatingPoint}(3.2)
@@ -497,34 +428,25 @@ an abstract type:
     julia> typeof(m.a)
     Float32
 
-For all practical purposes, such objects behave identically to those
-of ``MyStillAmbiguousType``.
+对于一切实际目的，这些对象对 `MyStillAmbiguousType` 的行为相同。
 
-It's quite instructive to compare the sheer amount code generated for
-a simple function
-:
+对比一个简单程序所产生的全部代码是很有意义的：
 
     func(m::MyType) = m.a+1
 
-using
-:
+使用：
 
     code_llvm(func,(MyType{Float64},))
     code_llvm(func,(MyType{FloatingPoint},))
     code_llvm(func,(MyType,))
 
-For reasons of length the results are not shown here, but you may wish
-to try this yourself. Because the type is fully-specified in the first
-case, the compiler doesn't need to generate any code to resolve the
-type at run-time.  This results in shorter and faster code.
+由于长度的原因，结果并没有在这里显示，但您不妨自己尝试一下。因为在第一种情况下，该类型是完全指定的，编译器不需要在运行时生成任何代码来解决类型的问题。这就会有更短的代码更快的编码速度。
 
 
 
 ###如何声明“抽象容器类型”的域
 
-
-The same best practices that apply in the `previous section
-<#man-abstract-fields>`_ also work for container types:
+与应用在[上一章节](http://julia-cn.readthedocs.org/zh_CN/latest/manual/faq/#man-abstract-fields)中的最好的相同的例子在容器类型中也适用：
 
 
 
@@ -536,7 +458,7 @@ The same best practices that apply in the `previous section
              a::AbstractVector{T}
            end
 
-For example:
+例如：
 
 
 
@@ -560,15 +482,9 @@ For example:
     julia> typeof(b)
     MyAmbiguousContainer{Int64} (constructor with 1 method)
 
-For ``MySimpleContainer``, the object is fully-specified by its type
-and parameters, so the compiler can generate optimized functions. In
-most instances, this will probably suffice.
+对于 `MySimpleContainer`，对象是由其类型和参数完全指定的，所以编译器可以生成优化的功能。在大多数情况下，这可能就足够了。
 
-While the compiler can now do its job perfectly well, there are cases
-where *you* might wish that your code could do different things
-depending on the *element type* of ``a``.  Usually the best way to
-achieve this is to wrap your specific operation (here, ``foo``) in a
-separate function::
+虽然现在编译器可以完美地完成它的工作，但某些时候您可能希望您的代码能够根据 `a` 的*元素类型*做出不同的东西。通常，达到这一点最好的方法是把您的具体操作（这里是 `foo`）包在一个单独的函数里：
 
     function sumfoo(c::MySimpleContainer)
         s = 0
@@ -581,12 +497,9 @@ separate function::
     foo(x::Integer) = x
     foo(x::FloatingPoint) = round(x)
 
-This keeps things simple, while allowing the compiler to generate
-optimized code in all cases.
+这在允许编译器在所有情况下都生成优化的代码，同时保持做起来很简单。
 
-However, there are cases where you may need to declare different
-versions of the outer function for different element types of
-``a``. You could do it like this::
+然而，有时候您需要根据 `a` 的不同的元素类型来声明外部函数的不同版本。您可以像这样来做：
 
     function myfun{T<:FloatingPoint}(c::MySimpleContainer{Vector{T}})
         ...
@@ -595,10 +508,7 @@ versions of the outer function for different element types of
         ...
     end
 
-This works fine for ``Vector{T}``, but we'd also have to write
-explicit versions for ``UnitRange{T}`` or other abstract types. To
-prevent such tedium, you can use two parameters in the declaration of
-``MyContainer``::
+这对于 `Vector{T}` 来讲不错，但是我们也要给 `UnitRange{T}` 或其他抽象类写明确的版本。为了防止这样单调乏味的情况，您可以在 `MyContainer` 的声明中来使用两个变量：
 
     type MyContainer{T, A<:AbstractVector}
         a::A
@@ -610,9 +520,7 @@ prevent such tedium, you can use two parameters in the declaration of
     julia> typeof(b)
     MyContainer{Float64,UnitRange{Float64}}
 
-Note the somewhat surprising fact that ``T`` doesn't appear in the
-declaration of field ``a``, a point that we'll return to in a moment.
-With this approach, one can write functions such as::
+请注意一个有点令人惊讶的事实，`T` 没有在 `a` 的域中声明，一会之后我们将会回到这一点。用这种方法，一个人可以编写像这样的函数：
 
     function myfunc{T<:Integer, A<:AbstractArray}(c::MyContainer{T,A})
         return c.a[1]+1
@@ -639,19 +547,16 @@ With this approach, one can write functions such as::
     julia> myfunc(MyContainer([1:3]))
     4
 
-As you can see, with this approach it's possible to specialize on both
-the element type ``T`` and the array type ``A``.
+正如您所看到的，用这种方法可以既专注于元素类型 `T` 也专注于数组类型 `A`。
 
-However, there's one remaining hole: we haven't enforced that ``A``
-has element type ``T``, so it's perfectly possible to construct an
-object like this:
+然而还剩下一个问题：我们没有强制使 `A` 包括元素类型 `T`，所以完全有可能构造这样一个对象：
 
   julia> b = MyContainer{Int64, UnitRange{Float64}}(1.3:5);
 
   julia> typeof(b)
   MyContainer{Int64,UnitRange{Float64}}
 
-To prevent this, we can add an inner constructor:
+为了防止这一点，我们可以添加一个内部构造函数：
 
     type MyBetterContainer{T<:Real, A<:AbstractVector}
         a::A
@@ -669,128 +574,85 @@ To prevent this, we can add an inner constructor:
     julia> b = MyBetterContainer{Int64, UnitRange{Float64}}(1.3:5);
     ERROR: no method MyBetterContainer(UnitRange{Float64},)
 
-The inner constructor requires that the element type of ``A`` be ``T``.
+内部构造函数要求 `A` 的元素类型为 `T`。
 
-Nothingness and missing values
-------------------------------
+## 无和缺值
 
-###How does "null" or "nothingness" work in Julia?
+### Julia 中的“空（null）”和“无（nothingness）”如何工作？
 
 
-Unlike many languages (for example, C and Java), Julia does not have a
-"null" value. When a reference (variable, object field, or array element)
-is uninitialized, accessing it will immediately throw an error. This
-situation can be detected using the ``isdefined`` function.
+不像许多其他语言（例如，C 和 Java）中的那样，Julia 中没有“空（null）”值。当引用（变量，对象的域，或者数组元素）是未初始化的，访问它就会立即抛出一个错误。这种情况可以通过 `isdefined` 函数检测。
 
-Some functions are used only for their side effects, and do not need to
-return a value. In these cases, the convention is to return the value
-``nothing``, which is just a singleton object of type ``Nothing``. This
-is an ordinary type with no fields; there is nothing special about it
-except for this convention, and that the REPL does not print anything
-for it. Some language constructs that would not otherwise have a value
-also yield ``nothing``, for example ``if false; end``.
+有些函数只用于其副作用，不需要返回值。在这种情况下，惯例返回 `nothing`，它只是一个 `Nothing` 类型的对象。这是一个没有域的普通类型；它除了这个惯例之外，没有什么特殊的，并且 REPL 不会为它打印任何东西。一些不能有值的语言结构也统一为 `nothing`，例如 `if false; end`。
 
-Note that ``Nothing`` (uppercase) is the type of ``nothing``, and should
-only be used in a context where a type is required (e.g. a declaration).
+注意 `Nothing`（大写）是 `nothing` 的类型，并且只应该用在一个类型被需求环境中（例如一个声明）。
 
-You may occasionally see ``None``, which is quite different. It is the
-empty (or "bottom") type, a type with no values and no subtypes (except
-itself). You will generally not need to use this type.
+您可能偶尔看到 `None`，这是完全不同的。它是空（empty，或是“底”bottom）类型，一类没有值也没有子类型（subtypes，除了它本身）的类型。您一般不需要使用这种类型。
 
-The empty tuple (``()``) is another form of nothingness. But, it should not
-really be thought of as nothing but rather a tuple of zero values.
+空元组（`()`）是另一种类型的无。但是它不应该真的被认为是什么都没有而是一个零值的元组。
 
 Julia 发行版
 ------------
 
-###Do I want to use a release, beta, or nightly version of Julia?
+### 我想要使用一个 Julia 的发行版本（release），测试版（beta），或者是夜间版（nightly version）？
 
 
-You may prefer the release version of Julia if you are looking for a stable code base. Releases generally occur every 6 months, giving you a stable platform for writing code.
+如果您想要一个稳定的代码基础，您可能更倾向于 Julia 的发行版本。一般情况下每 6 个月发布一次，给您一个稳定的写代码平台。
 
-You may prefer the beta version of Julia if you don't mind being slightly behind the latest bugfixes and changes, but find the slightly faster rate of changes more appealing. Additionally, these binaries are tested before they are published to ensure they are fully functional.
+如果您不介意稍稍落后于最新的错误修正和更改的话，但是发现更具有吸引力的更改的更快一点的速度，您可能更喜欢 Julia 测试版本。此外，这些二进制文件在发布之前进行测试，以确保它们是具有完全功能的。
 
-You may prefer the nightly version of Julia if you want to take advantage of the latest updates to the language, and don't mind if the version available today occasionally doesn't actually work.
+如果您想利用语言的最新更新，您可能更喜欢使用 Julia 的夜间版本，并且不介意这个版本偶尔不工作。
 
-Finally, you may also consider building Julia from source for yourself. This option is mainly for those individuals who are comfortable at the command line, or interested in learning. If this describes you, you may also be interested in reading our `guidelines for contributing`__.
+最后，您也可以考虑从源头上为自己建造 Julia。此选项主要是对那些对命令行感到舒适或对学习感兴趣的个人。如果这描述了您，您可能也会感兴趣在阅读我们[指导方针](https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md)。
 
-__ https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md
-
-Links to each of these download types can be found on the download page at http://julialang.org/downloads/. Note that not all versions of Julia are available for all platforms.
+这些下载类型的链接可以在下载页面 [http://julialang.org/downloads/](http://julialang.org/downloads/) 找到。请注意，并非所有版本的 Julia 都可用于所有平台。
 
 ###何时移除舍弃的函数？
 
 
-Deprecated functions are removed after the subsequent release. For example, functions marked as deprecated in the 0.1 release will not be available starting with the 0.2 release.
+过时的功能在随后的发行版本之后去除。例如，在 0.1 发行版本中被标记为过时的功能将不会在 0.2 发行版本中使用。
 
 开发 Julia
 ----------
 
-How do I debug julia's C code? (running the julia REPL from within a debugger like gdb)
+### 我要如何调试 Julia 的 C 代码？（从一个像是 gdb 的调试器内部运行 Julia REPL）
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First, you should build the debug version of julia with ``make
-debug``.  Below, lines starting with ``(gdb)`` mean things you should
-type at the gdb prompt.
+首先您应该用 `make debug` 构建 Julia 调试版本。下面，以`(gdb)`开头的行意味着您需要在 gdb  prompt 下输入。
 
-###From the shell
+### 从 shell 开始
 
 
-The main challenge is that Julia and gdb each need to have their own
-terminal, to allow you to interact with them both.  One approach is to
-use gdb's ``attach`` functionality to debug an already-running julia
-session.  However, on many systems you'll need root access to get this
-to work. What follows is a method that can be implemented with just
-user-level permissions.
+主要的挑战是 Julia 和 gdb 都需要有它们自己的终端，来允许您和它们交互。一个方法是使用 gdb 的 `attach` 功能来调试一个已经运行的 Julia session。然而，在许多系统中，您需要使用根访问（root access）来使这个工作。下面是一个可以只使用用户级别权限来实现的方法。
 
-The first time you do this, you'll need to define a script, here
-called ``oterm``, containing the following lines::
+第一次做这种事时，您需要定义一个脚本，在这里被称为 `oterm`，包含以下几行：
+
 
     ps
     sleep 600000
 
-Make it executable with ``chmod +x oterm``.
-
-Now:
-
-- From a shell (called shell 1), type ``xterm -e oterm &``. You'll see
-  a new window pop up; this will be called terminal 2.
-
-- From within shell 1, ``gdb julia-debug``. You can find this
-  executable within ``julia/usr/bin``.
-
-- From within shell 1, ``(gdb) tty /dev/pts/#`` where ``#`` is the
-  number shown after ``pts/`` in terminal 2.
-
-- From within shell 1, ``(gdb) run``
-
-- From within terminal 2, issue any preparatory commands in Julia that
-  you need to get to the step you want to debug
-
-- From within shell 1, hit Ctrl-C
-
-- From within shell 1, insert your breakpoint, e.g., ``(gdb) b codegen.cpp:2244``
-- From within shell 1, ``(gdb) c`` to resume execution of julia
-
-- From within terminal 2, issue the command that you want to
-  debug. Shell 1 will stop at your breakpoint.
+让它用 `chmod +x oterm` 执行。
 
 
-###Within emacs
+现在：
+
+- 从一个 shell（被称为 shell 1）开始，类型 `xterm -e oterm &`。您会看到一个新的窗口弹出，这将被称为终端 2。
+- 从 shell 1 之内，`gdb julia-debug`。您将会在 `julia/usr/bin` 里找到这个可执行文件。
+- 从 shell 1 之内，`(gdb) tty /dev/pts/#` 里面的 `#` 是在 terminal 2 中 `pts/` 之后显示的数字。
+- 从 shell 1 之内，`(gdb) run`
+- 从 terminal 2 之内，在 Julia 中发布任何准备好的您需要的命令来进入您想调试的步骤
+- 从 shell 1 之内，按 Ctrl-C
+- 从 shell 1 之内，插入您的断点，例如 `(gdb) b codegen.cpp:2244`
+- 从 shell 1 之内，`(gdb) c` 来继续 Julia 的执行
+- 从 terminal 2 之内，发布您想要调试的命令，shell 1 将会停在您的断点处。
 
 
-- ``M-x gdb``, then enter ``julia-debug`` (this is easiest from
-  within julia/usr/bin, or you can specify the full path)
+### 在 emacs 之内
 
-- ``(gdb) run``
-
-- Now you'll see the Julia prompt. Run any commands in Julia you need
-  to get to the step you want to debug.
-
-- Under emacs' "Signals" menu choose BREAK---this will return you to the ``(gdb)`` prompt
-
-- Set a breakpoint, e.g., ``(gdb) b codegen.cpp:2244``
-
-- Go back to the Julia prompt via ``(gdb) c``
-
-- Execute the Julia command you want to see running.
+- `M-x gdb`，然后进入 `julia-debug`（这可以最简单的从 julia/usr/bin 找到，或者您可以指定完整路径）
+- `(gdb) run`
+- 现在您将会看到 Julia prompt。在 Julia 中运行任何您需要的命令来达到您想要调试的步骤。
+- 在 emacs 的“Signals”菜单下选择 BREAK——这将会使您返回到 `(gdb)` prompt
+- 设置一个断点，例如，`(gdb) b codegen.cpp:2244`
+- 通过 `(gdb) c` 返回到 Julia prompt
+- 执行您想要运行的 Julia 命令。
