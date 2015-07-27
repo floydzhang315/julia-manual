@@ -180,14 +180,7 @@ Julia 自动调用 ``convert`` 函数，将参数转换为指定类型。例如�
     ccall(:main, Int32, (Int32, Ptr{Ptr{Uint8}}), length(argv), argv)
 ```
 
-For ``wchar_t*`` arguments, the Julia type should be ``Ptr{Wchar_t}``,
-and data can be converted to/from ordinary Julia strings by the
-``wstring(s)`` function (equivalent to either ``utf16(s)`` or ``utf32(s)``
-depending upon the width of ``Cwchar_t``.    Note also that ASCII, UTF-8,
-UTF-16, and UTF-32 string data in Julia is internally NUL-terminated, so
-it can be passed to C functions expecting NUL-terminated data without making
-a copy.
-
+对于 ```wchar_t*``` 参数，Julia 类型为 ```Ptr{Wchar_t}```,并且数据可以通过 ```wstring(s)``` 方法转换为原始的 Julia 字符串(等同于 ```utf16(s)``` 或```utf32(s)``` ,这取决于 ```Cwchar_t``` 的宽度)。还要注意 ASCII, UTF-8, UTF-16, 和UTF-32 字符串数据在 Julia 内部是以 NUL 结尾的，所以它能够传递到 C 函数中以 NUL 为结尾的数据，而不用在做一个拷贝。
 
 ### 通过指针读取数据
 
@@ -265,42 +258,28 @@ Julia 会自动传递一个 C 指针到被这个值:
 
 更多信息请参考 [LLVM Language Reference](http://llvm.org/docs/LangRef.html#calling-conventions)
 
-### Accessing Global Variables
+### 访问全局变量
 
 
-Global variables exported by native libraries can be accessed by name using the
-``cglobal`` function. The arguments to ``cglobal`` are a symbol specification
-identical to that used by ``ccall``, and a type describing the value stored in
-the variable:
+当全局变量导出到本地库时可以使用 ``cglobal``方法，通过名称进行访问。 ``cglobal``的参数和 ``ccall`` 的指定参数是相同的符号，并且其表述了存储在变量中的值类型：
 
 ```
     julia> cglobal((:errno,:libc), Int32)
     Ptr{Int32} @0x00007f418d0816b8
 ```
 
-The result is a pointer giving the address of the value. The value can be
-manipulated through this pointer using ``unsafe_load`` and ``unsafe_store``.
+该结果是一个该值的地址的指针。可以通过这个指针对这个值进行操作，但需要使用 ``unsafe_load`` 和 ``unsafe_store``。
 
-### Passing Julia Callback Functions to C
+### 将 Julia 的回调函数传递给 C
 
-
-It is possible to pass Julia functions to native functions that accept function
-pointer arguments. A classic example is the standard C library ``qsort`` function,
-declared as:
+可以将 Julia 函数传递给本地的函数，只要该函数有指针参数。一个典型的例子为标准 C 库 ``qsort`` 函数，描述如下：
 
 ```
     void qsort(void *base, size_t nmemb, size_t size,
                int(*compare)(const void *a, const void *b));
 ```
 
-The ``base`` argument is a pointer to an array of length ``nmemb``, with elements of
-``size`` bytes each. ``compare`` is a callback function which takes pointers to two
-elements ``a`` and ``b`` and returns an integer less/greater than zero if ``a`` should
-appear before/after ``b`` (or zero if any order is permitted). Now, suppose that we
-have a 1d array ``A`` of values in Julia that we want to sort using the ``qsort``
-function (rather than Julia’s built-in sort function). Before we worry about calling
-``qsort`` and passing arguments, we need to write a comparison function that works for
-some arbitrary type T:
+``base`` 参数是一个书组长度 ``nmemb`` 的指针，每个元素大小为 ``size`` 字节。``compare`` 是一个回调函数，带有两个元素 ``a`` 和 ``b`` 的指针，并且如果 ``a`` 在 ``b`` 之前或之后出现，则返回一个大于或者小于 0 的整数（如果允许任意顺序的话，结果为0）。现在假设我们在 Julia 值中有一个一维数组 ``A``，我们想给这个数组进行排序，使用 ``qsort`` 函数（不用 Julia 的内置函数）。在我们调用 ``qsort`` 和传递参数之前，我们需要写一个比较函数，来适应任意类型 T：
 
 ```
     function mycompare{T}(a_::Ptr{T}, b_::Ptr{T})
@@ -310,21 +289,17 @@ some arbitrary type T:
     end
 ```
 
-Notice that we have to be careful about the return type: ``qsort`` expects a function
-returning a C ``int``, so we must be sure to return ``Cint`` via a call to ``convert``.
+请注意，我们必须注意返回值类型： ``qsort`` 需要的是 C 语言的 ``int`` 类型变量作为返回值，所以我们必须通过调用 ``convert`` 来确保返回 ``Cint``。
 
-In order to pass this function to C, we obtain its address using the function
-``cfunction``:
+为了能够传递这个函数给 C，我们要通过 ``cfunction`` 来得到它的地址:
 
 ```
     const mycompare_c = cfunction(mycompare, Cint, (Ptr{Cdouble}, Ptr{Cdouble}))
 ```
 
-``cfunction`` accepts three arguments: the Julia function (``mycompare``), the return
-type (``Cint``), and a tuple of the argument types, in this case to sort an array of
-``Cdouble`` (Float64) elements.
+``cfunction`` 接受三个参数：Julia 函数（``mycompare``），返回值类型 （``Cint``）,和一个参数类型的元组，在这种情况下对 ``cdouble``（Float64）元素 的数组进行排序。
 
-The final call to ``qsort`` looks like this:
+最终对 ``qsort`` 的调用如下：
 
 ```
     A = [1.3, -2.7, 4.4, 3.1]
@@ -332,35 +307,22 @@ The final call to ``qsort`` looks like this:
           A, length(A), sizeof(eltype(A)), mycompare_c)
 ```
 
-After this executes, ``A`` is changed to the sorted array ``[ -2.7, 1.3, 3.1, 4.4]``.
-Note that Julia knows how to convert an array into a ``Ptr{Cdouble}``, how to compute
-the size of a type in bytes (identical to C’s ``sizeof`` operator), and so on.
-For fun, try inserting a ``println("mycompare($a,$b)")`` line into ``mycompare``, which
-will allow you to see the comparisons that ``qsort`` is performing (and to verify that
-it is really calling the Julia function that you passed to it).
+执行该操作之后， ``A`` 会更改为排序数组 ``[ -2.7, 1.3, 3.1, 4.4]``。注意 Julia 知道如何去将数组转换为 ``Ptr{Cdouble}``,如何计算字节大小（与 C 的 ``sizeof`` 是相同的）等等。
+如果你有兴趣，你可以尝试在 ``mycompare`` 插入一个 ``println("mycompare($a,$b)")``，这将允许你以比较的方式去查看 ``qsort``  
+（并且确认它的确调用了 你传递的 Julia 函数）。
 
-### Thread-safety
+### 线程安全
 
 
-Some C libraries execute their callbacks from a different thread, and
-since Julia isn't thread-safe you'll need to take some extra
-precautions. In particular, you'll need to set up a two-layered
-system: the C callback should only *schedule* (via Julia's event loop)
-the execution of your "real" callback. Your callback
-needs to be written to take two inputs (which you'll most likely just
-discard) and then wrapped by ``SingleAsyncWork``::
+一些 C 从不同的线程中执行他们的回调函数，并且 Julia 不含有线程安全，你需要做一些额外的预防措施。特别是，你需要设置两层系统：C 的回调应该只调度（通过 Julia 的时间循环）你“真正”的回调函数的执行。你的回调需要两个输入（你很可能会忘记）并且通过 ``SingleAsyncWork`` 进行包装::
 
   cb = Base.SingleAsyncWork(data -> my_real_callback(args))
 
-The callback you pass to C should only execute a ``ccall`` to
-``:uv_async_send``, passing ``cb.handle`` as the argument.
+你传递给 C 的回调应该仅仅执行 ``ccall`` 到 ``:uv_async_send`` ,传递 ``cb.handle`` 作为参数
 
-### More About Callbacks
+### 关于回调更多的内容
 
-
-For more details on how to pass callbacks to C libraries, see this
-`blog post <http://julialang.org/blog/2013/05/callback/>`_.
-
+对于更多的如何传递回调到 C 库的细节，请参考`blog post <http://julialang.org/blog/2013/05/callback/>`_.
 ### C++
 
 
