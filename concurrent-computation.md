@@ -100,32 +100,24 @@ julia> remotecall_fetch(2, ()->id)
 @everywhere include("defs.jl")
 ```
 
-A file can also be preloaded on multiple processes at startup, and a driver script can be used to drive the computation::
+文件也可以在多个进程启动时预加载,并且一个驱动脚本可以用于驱动计算：
 
 ```
     julia -p <n> -L file1.jl -L file2.jl driver.jl
 ```
     
-Each process has an associated identifier. The process providing the interactive julia prompt
-always has an id equal to 1, as would the julia process running the driver script in the
-example above.
-The processes used by default for parallel operations are referred to as ``workers``.
-When there is only one process, process 1 is considered a worker. Otherwise, workers are
-considered to be all processes other than process 1.
+每个进程都有一个关联的标识符。这个过程提供的 Julia 提示总是有一个 id 值为 1 ,就如上面例子中 julia 进程会运行驱动脚本一样。
+这个被默认用作平行操作的进程被称为``工人``。当只有一个进程的时候，进程 1 就被当做一个工人。否则，工人就是指除了进程 1 之外的所有进程。
 
-The base Julia installation has in-built support for two types of clusters: 
+Julia 内置有对于两种集群的支持：
 
-    - A local cluster specified with the ``-p`` option as shown above.  
+    - 如上文所示,一个本地集群指定使用 ``—p`` 选项。
+    - 一个集群生成机器使用 ``--machinefile`` 选项。它使用一个无密码的 ``ssh`` 登来在指定的机器上启动 julia 工作进程(以相同的路径作为当前主机)。
     
-    - A cluster spanning machines using the ``--machinefile`` option. This uses a passwordless 
-      ``ssh`` login to start julia worker processes (from the same path as the current host)
-      on the specified machines.
-    
-Functions ``addprocs``, ``rmprocs``, ``workers``, and others are available as a programmatic means of 
-adding, removing and querying the processes in a cluster.
+函数 ``addprocs``,``rmprocs``,``workers``,当然还有其他的在一个集群中可用的以可编程的方式进行添加,删除和查询的函数。
 
-Other types of clusters can be supported by writing your own custom ClusterManager. See section on 
-ClusterManagers.
+
+其他类型的集群可以通过编写自己的自定义 ClusterManager。请参阅 ClusterManagers 部分。
 
 ## 数据移动
 
@@ -217,40 +209,25 @@ ClusterManagers.
 
 被调用的函数需处理大量工作时使用 ``pmap`` ，反之，则使用 ``@parallel for`` 。
 
-## Synchronization With Remote References
+## 与远程引用同步
 
 
-## Scheduling
+## 调度
 
 
-Julia's parallel programming platform uses
-:ref:`man-tasks` to switch among
-multiple computations. Whenever code performs a communication operation
-like ``fetch`` or ``wait``, the current task is suspended and a
-scheduler picks another task to run. A task is restarted when the event
-it is waiting for completes.
+Julia 的平行编程平台使用 :ref:`man-tasks` ,其可在多个计算中切换。每当代码执行一个通信操作，例如 ``fetch`` 或者  ``wait`` ，当前任务便暂停同时调度器会选择另一个任务运行。在事件等待完成后，任务会重新启动。
 
-For many problems, it is not necessary to think about tasks directly.
-However, they can be used to wait for multiple events at the same time,
-which provides for *dynamic scheduling*. In dynamic scheduling, a
-program decides what to compute or where to compute it based on when
-other jobs finish. This is needed for unpredictable or unbalanced
-workloads, where we want to assign more work to processes only when
-they finish their current tasks.
 
-As an example, consider computing the singular values of matrices of
-different sizes:
+对于很多问题，没必要直接考虑任务。然而，提供了动态调度，可以同时等待多个事件。在动态调度中，一个程序决定计算什么和在哪计算，这是基于其他工作何时完成的。这是被不可预知的或不可平衡的工作荷载所需要的，只有当他们结束当前任务我们才能分配更多的工作进程。
+
+作为一个例子,考虑计算不同大小的矩阵的奇异值:
 
 ```
     M = {rand(800,800), rand(600,600), rand(800,800), rand(600,600)}
     pmap(svd, M)
 ```
 
-If one process handles both 800x800 matrices and another handles both
-600x600 matrices, we will not get as much scalability as we could. The
-solution is to make a local task to "feed" work to each process when
-it completes its current task. This can be seen in the implementation of
-``pmap``:
+如果一个进程要处理 800 x800 矩阵和另一个 600x600 矩阵,我们不会得到很多的可伸缩性。解决方案是让本地的任务在他们完成当前的任务时去“喂”每个进程中的工作。``pmap`` 的实现过程中可以看到这个:
 
 ```
     function pmap(f, lst)
@@ -280,18 +257,7 @@ it completes its current task. This can be seen in the implementation of
     end
 ```
 
-``@async`` is similar to ``@spawn``, but only runs tasks on the
-local process. We use it to create a "feeder" task for each process.
-Each task picks the next index that needs to be computed, then waits for
-its process to finish, then repeats until we run out of indexes. Note
-that the feeder tasks do not begin to execute until the main task
-reaches the end of the ``@sync`` block, at which point it surrenders
-control and waits for all the local tasks to complete before returning
-from the function. The feeder tasks are able to share state via
-``nextidx()`` because they all run on the same process. No locking is
-required, since the threads are scheduled cooperatively and not
-preemptively. This means context switches only occur at well-defined
-points: in this case, when ``remotecall_fetch`` is called.
+只有在本地运行任务的过程中，``@async`` 才与 ``@spawn`` 类似,。我们使用它来为每个流程创建一个“供给”的任务。每个任务选择下一个需要被计算的指数,然后等待它的进程完成,接着一直重复到用完指数。注意,“供给”任务只有当主要任务到达 ``@sync`` 块结束时才开始执行,此时它放弃控制并等待所有的本地任务在从函数返回之前完成。供给任务可以通过 ``nextidx()`` 共享状态,因为它们都在相同的进程上运行。这个过程不需要锁定,因为线程是实时进行调度的而不是一成不变。这意味着内容的切换只发生在定义好的时候:在这种情况下,当 ``remotecall_fetch`` 会被调用。
 
 ## 分布式数组
 
@@ -318,19 +284,10 @@ points: in this case, when ``remotecall_fetch`` is called.
     dzeros((100,100), [1:4], [1,4])
 ```
 
-The second argument specifies that the array should be created on processors
-1 through 4. When dividing data among a large number of processes,
-one often sees diminishing returns in performance. Placing ``DArray``\ s
-on a subset of processes allows multiple ``DArray`` computations to
-happen at once, with a higher ratio of work to communication on each
-process.
 
-The third argument specifies a distribution; the nth element of
-this array specifies how many pieces dimension n should be divided into.
-In this example the first dimension will not be divided, and the second
-dimension will be divided into 4 pieces. Therefore each local chunk will be
-of size ``(100,25)``. Note that the product of the distribution array must
-equal the number of processes.
+第二个参数指定了数组应该在处理器 1 到 4 中创建。划分含有很多进程的数据时,人们经常看到性能收益递减。把 ``DArrays`` 放在一个进程的子集中，该进程允许多个 ``DArray`` 同时计算,并且每个进程拥有更高比例的通信工作。
+
+第三个参数指定了一个分布;数组第 n 个元素指定了应该分成多少个 块。在本例中,第一个维度不会分割,而第二个维度将分为四块。因此每个局部块的大小为 ``(100，25)``。注意,分布式数组必须与进程数量相符。
 
 ``distribute(a::Array)`` 可用来将本地数组转换为分布式数组。
 
@@ -366,14 +323,7 @@ equal the number of processes.
 
 ## 分布式数组运算
 
-
-At this time, distributed arrays do not have much functionality. Their
-major utility is allowing communication to be done via array indexing, which
-is convenient for many problems. As an example, consider implementing the
-"life" cellular automaton, where each cell in a grid is updated according
-to its neighboring cells. To compute a chunk of the result of one iteration,
-each process needs the immediate neighbor cells of its local chunk. The
-following code accomplishes this:
+在这个时候,分布式数组没有太多的功能。主要功能是通过数组索引来允许进行通信，这对许多问题来说都很方便。作为一个例子,考虑实现“生活”细胞自动机,每个单元网格中的细胞根据其邻近的细胞进行更新。每个进程需要其本地块中直接相邻的细胞才能计算一个迭代的结果。下面的代码可以实现这个功能:
 
 ```
     function life_step(d::DArray)
@@ -399,12 +349,7 @@ following code accomplishes this:
     end
 ```
 
-As you can see, we use a series of indexing expressions to fetch
-data into a local array ``old``. Note that the ``do`` block syntax is
-convenient for passing ``init`` functions to the ``DArray`` constructor.
-Next, the serial function ``life_rule`` is called to apply the update rules
-to the data, yielding the needed ``DArray`` chunk. Nothing about ``life_rule``
-is ``DArray``\ -specific, but we list it here for completeness:
+可以看到,我们使用一系列的索引表达式来获取一个本地数组中的数组 ``old`` 。注意,``do`` 块语法方便 ``init`` 函数传递给 ``DArray`` 构造函数。接下来,连续函数 ``life_rule`` 被调用以提供数据的更新规则，产生所需的 ``DArray`` 块。 ``life_rule`` 与 ``DArray-specific`` 没有关系,但为了完整性，我们在此仍将它列出:
 
 ```
     function life_rule(old)
@@ -423,43 +368,20 @@ is ``DArray``\ -specific, but we list it here for completeness:
 ```
 
 
-## Shared Arrays (Experimental, UNIX-only feature)
+## 共享数组 (用于试验, 仅在 unix 上)
 
+共享阵列使用在许多进程中共享内存来映射相同数组的系统。虽然与 ``DArray`` 有一些相似之处,但是 ``SharedArray`` 的行为是完全不同的。在一个 ``DArray`` 中,每个进程只能本地访问一块数据,并且两个进程共享同一块;相比之下,在 ``SharedArray`` 中，每个“参与”的进程能够访问整个数组。当你想要在同一台机器上大量数据共同访问两个或两个以上的进程时， ``SharedArray`` 是一个不错的选择。
 
-Shared Arrays use system shared memory to map the same array across
-many processes.  While there are some similarities to a ``DArray``,
-the behavior of a ``SharedArray`` is quite different. In a ``DArray``,
-each process has local access to just a chunk of the data, and no two
-processes share the same chunk; in contrast, in a ``SharedArray`` each
-"participating" process has access to the entire array.  A
-``SharedArray`` is a good choice when you want to have a large amount
-of data jointly accessible to two or more processes on the same machine.
+ ``SharedArray`` 索引(分配和访问值)与常规数组一样工作,并切是非常高效的,因为其底层内存可用于本地进程。因此,大多数算法自然地在 ``SharedArrays`` 上运行,即使在单进程模式中。当某个算法必须在一个 ``Array`` 输入的情况下,可以从 ``SharedArray`` 检索底层数组通过调用 ``sdata(S)`` 取回。对于其他 ``AbstractArray`` 类型, ``sdata`` 返回对象本身,所以在任何数组类型下使用 ``sdata`` 都是很安全的。
 
-``SharedArray`` indexing (assignment and accessing values) works just
-as with regular arrays, and is efficient because the underlying memory
-is available to the local process.  Therefore, most algorithms work
-naturally on ``SharedArrays``, albeit in single-process mode.  In
-cases where an algorithm insists on an ``Array`` input, the underlying
-array can be retrieved from a ``SharedArray`` by calling ``sdata(S)``.
-For other ``AbstractArray`` types, ``sdata`` just returns the object
-itself, so it's safe to use ``sdata`` on any Array-type object.
-
-The constructor for a shared array is of the form::
-
+共享数字构造函数数的形式:
   SharedArray(T::Type, dims::NTuple; init=false, pids=Int[])
-
-which creates a shared array of a bitstype ``T`` and size ``dims``
-across the processes specified by ``pids``.  Unlike distributed
-arrays, a shared array is accessible only from those participating
-workers specified by the ``pids`` named argument (and the creating
-process too, if it is on the same host).
+创建一个被 ``pids`` 进程指定的，bitstype为 ``T`` 并且大小为 ``dims`` 的共享数组。与分布式阵列不同,共享数组只能用于这些参与人员指定的以 ``pid`` 命名的参数(如果在同一个主机上，创建过程也同样如此)。
   
-If an ``init`` function, of signature ``initfn(S::SharedArray)``, is
-specified, it is called on all the participating workers.  You can
-arrange it so that each worker runs the ``init`` function on a
-distinct portion of the array, thereby parallelizing initialization.
 
-Here's a brief example:
+如果一个签名为 ``initfn(S::SharedArray)`` 的 ``init`` 函数, 被指定,它会所有参与人员调用。你可以控制它，每个工人可以运行 ``init`` 函数在不同部分的数组,因此进行并行的初始化。
+
+这里有一个简单的例子:
 
 ```
   julia> addprocs(3)
@@ -484,9 +406,7 @@ Here's a brief example:
    2  7  4  4
 ```
 
-``localindexes`` provides disjoint one-dimensional ranges of indexes,
-and is sometimes convenient for splitting up tasks among processes.
-You can, of course, divide the work any way you wish:
+``localindexes`` 提供不相交的一维索引的范围,他有时方便进程之间的任务交流。当然,你可以按你希望的方式来划分工作:
 
 ```
   julia> S = SharedArray(Int, (3,4), init = S -> S[myid()-1:nworkers():length(S)] = myid())
@@ -496,8 +416,7 @@ You can, of course, divide the work any way you wish:
    4  4  4  4
 ```
 
-Since all processes have access to the underlying data, you do have to
-be careful not to set up conflicts.  For example::
+因为所有进程都可以访问底层数据,你必须小心不要设置冲突。例如:
 
 ```
   @sync begin
@@ -509,20 +428,12 @@ be careful not to set up conflicts.  For example::
   end
 ```
 
-would result in undefined behavior: because each process fills the
-*entire* array with its own ``pid``, whichever process is the last to
-execute (for any particular element of ``S``) will have its ``pid``
-retained.
-
+这有可能导致未定义的行为:因为每个进程有他自己的 ``pid`` 来充满整个数组,无论最后执行的是哪一个进程（任何特定元素``S``）都将保留他的 ``pid``。
 
 ## ClusterManagers
 
+Julia 工作进程也可以在任意机器中产生,让 Julia 的自然并行功能非常透明地在集群环境中运行。 ``ClusterManager`` 接口提供了一种方法来指定启动和管理工作进程的手段。例如, ``ssh`` 集群也使用 ``ClusterManager`` 来实现:
 
-Julia worker processes can also be spawned on arbitrary machines,
-enabling Julia's natural parallelism to function quite transparently
-in a cluster environment. The ``ClusterManager`` interface provides a
-way to specify a means to launch and manage worker processes. For
-example, ``ssh`` clusters are also implemented using a ``ClusterManager``:
 
 ```
     immutable SSHManager <: ClusterManager
@@ -542,18 +453,13 @@ example, ``ssh`` clusters are also implemented using a ``ClusterManager``:
     end
 ```
 
-where ``launch_ssh_workers`` is responsible for instantiating new
-Julia processes and ``manage_ssh_workers`` provides a means to manage
-those processes, e.g. for sending interrupt signals. New processes can
-then be added at runtime using ``addprocs``:
-
+``launch_ssh_workers`` 负责实例化新的 Julia 进程并且 ``manage_ssh_workers`` 提供了一种方法来管理这些进程,例如发送中断信号。在运行时可以使用 ``addprocs`` 添加新进程:
 ```
     addprocs(5, cman=LocalManager())
 ```
 
-which specifies a number of processes to add and a ``ClusterManager`` to
-use for launching those processes.
+来指定添加一批进程并且 ``ClusterManager`` 用于启动这些进程。
 
-Footnotes
+脚注
 
-[1]: In this context, MPI refers to the MPI-1 standard. Beginning with MPI-2, the MPI standards committee introduced a new set of communication mechanisms, collectively referred to as Remote Memory Access (RMA). The motivation for adding RMA to the MPI standard was to facilitate one-sided communication patterns. For additional information on the latest MPI standard, see <http://www.mpi-forum.org/docs>.
+[1]:在这边文中, MPI 是指 MPI-1 标准。从 MPI-2 开始,MPI标准委员会引入了一系列新的通信机制,统称为远程内存访问 (RMA) 。添加 RMA MPI 标准的动机是改善单方面的沟通模式。最新的 MPI 标准的更多信息,参见 <http://www.mpi-forum.org/docs>。
