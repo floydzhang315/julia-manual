@@ -1,21 +1,21 @@
 # 变量
 
-A variable, in Julia, is a name associated (or bound) to a value. It’s useful when you want to store a value (that you obtained after some math, for example) for later use. For example:
+在 Julia 中的一个变量是一个与一个值关联（或绑定）的名称。它的作用表现在当你想存储一个值（例如，你在进行一些数学运算后得到了一些值，你需要在之后使用到这些值）时。例如：
 
 ```
-# Assign the value 10 to the variable x
+# 给变量 x 赋值为 10
 julia> x = 10
 10
 
-# Doing math with x's value
+# 用 x 的值做一些数学运算
 julia> x + 1
 11
 
-# Reassign x's value
+# 重新给 x 赋值
 julia> x = 1 + 1
 2
 
-# You can assign values of other types, like strings of text
+# 您可以为变量赋给种类型的值，例如文本字符串等
 julia> x = "Hello World!"
 "Hello World!"
 ```
@@ -49,7 +49,7 @@ julia> 안녕하세요 = "Hello"
 "Hello"
 ```
 
-In the Julia REPL and several other Julia editing environments, you can type many Unicode math symbols by typing the backslashed LaTeX symbol name followed by tab. For example, the variable name δ can be entered by typing \delta-tab, or even α̂₂ by \alpha-tab-\hat-tab-\_2-tab.
+在 Julia REPL 和其他几个 Julia 编辑环境中，您可以通过输入反斜杠符号名称后再输入标签来键入很多 Unicode 数学符号。例如，变量名 ``δ`` 可以通过键入 ``\delta`` 键入，甚至可以通过输入 ``\alpha`` - *tab* - ``\hat`` - *tab* - ``\_2`` - *tab* 输入 ``α̂₂`` 。
 
 Julia 甚至允许重新定义内置的常数和函数：
 
@@ -76,9 +76,9 @@ julia> sqrt = 4
 
 ## 可用的变量名
 
-Variable names must begin with a letter (A-Z or a-z), underscore, or a subset of Unicode code points greater than 00A0; in particular, [Unicode character categories](http://www.fileformat.info/info/unicode/category/index.htm) Lu/Ll/Lt/Lm/Lo/Nl (letters), Sc/So (currency and other symbols), and a few other letter-like characters (e.g. a subset of the Sm math symbols) are allowed. Subsequent characters may also include ! and digits (0-9 and other characters in categories Nd/No), as well as other Unicode code points: diacritics and other modifying marks (categories Mn/Mc/Me/Sk), some punctuation connectors (category Pc), primes, and a few other characters.
+变量名必须以字母（a-z 或 A-Z），下划线，或一个 Unicode 编码指针中指向比 00A0 更大的指针子集开始；特别是 [Unicode 字符 ](http://www.fileformat.info/info/unicode/category/index.htm) Lu/Ll/Lt/Lm/Lo/Nl（字母），Sc/So （货币和其他符号），和其他一些可以看做字符的一些输入（例如 Sm 数学符号的子集）是允许的。首位之后的字符也包括 ！和数字（0-9 和其他字符 Nd/No ），以及其他 Unicode 编码指针：变音符号和其他修改标记（字母 Mn/Mc/Me/Sk），一些标点连接器（字母 PC），素数，和其他的一些字符。
 
-Operators like `+` are also valid identifiers, but are parsed specially. In some contexts, operators can be used just like variables; for example `(+)` refers to the addition function, and `(+) = f` will reassign it. Most of the Unicode infix operators (in category Sm), such as `⊕`, are parsed as infix operators and are available for user-defined methods (e.g. you can use const `⊗ = kron` to define `⊗` as an infix Kronecker product).
+运算符类似 `+` 也是有效的标识符，但需要特别解析。在某些情况下，运算符可以像变量一样使用；例如 `(+)` 是指增加功能，和 `(+) = f`  将重新定义这个运算。大多数的 Unicode 中缀操作符（在 Sm 中），如 `⊕` ，会被解析为中缀操作符，同时可以自定义方法（例如，你可以使用 `⊗ = kron` 定义 `⊕` 成为一个中缀 Kronecker 积）。
 
 内置的关键字不能当变量名：
 

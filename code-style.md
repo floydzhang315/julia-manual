@@ -1,53 +1,32 @@
+# 代码样式
 
-#代码样式
-
-
-The following sections explain a few aspects of idiomatic Julia coding style.
-None of these rules are absolute; they are only suggestions to help familiarize
-you with the language and to help you choose among alternative designs.
+以下各节从几方面介绍了符合语言习惯的 Julia 编码风格。这些规则都不是绝对的；它们仅仅是帮您熟悉这门语言，或是帮您可以在许多可替代性设计中能够做出选择的一些建议而已。
 
 ## 写成函数，别写成脚本
 
+编写代码作为在一系列步骤中最高级的办法，是可以快速开始解决问题的，但您应该试着尽快把一个程序分成许多函数。函数具有更好的可重用性和可测试性，并可以更好阐明它们正在做什么，它们的输入和输出是什么。此外，由于 Julia 的编译器工作原理，在函数中的代码往往比最高级别的代码运行得更快。
 
-Writing code as a series of steps at the top level is a quick way to get
-started solving a problem, but you should try to divide a program into
-functions as soon as possible. Functions are more reusable and testable,
-and clarify what steps are being done and what their inputs and outputs are.
-Furthermore, code inside functions tends to run much faster than top level
-code, due to how Julia's compiler works.
-
-It is also worth emphasizing that functions should take arguments, instead
-of operating directly on global variables (aside from constants like ``pi``).
+同样值得强调的是，函数应该以参数来代替，而不是直接在全局变量（除了像 pi 那样的常量）上操作。
 
 ## 避免类型过于严格
 
-
-Code should be as generic as possible. Instead of writing:
+代码应尽可能通用。相较于这样的代码书写：
 
 ```
     convert(Complex{Float64}, x)
 ```
 
-it's better to use available generic functions:
+使用有效的泛型函数是更好的：
 
 ```
     complex(float(x))
 ```
 
-The second version will convert ``x`` to an appropriate type, instead of
-always the same type.
+第二种写法把 ``x`` 转换成一个适当的类型，而不是一直用一个相同的类型。
 
-This style point is especially relevant to function arguments. For
-example, don't declare an argument to be of type ``Int`` or ``Int32``
-if it really could be any integer, expressed with the abstract type
-``Integer``.  In fact, in many cases you can omit the argument type
-altogether, unless it is needed to disambiguate from other method
-definitions, since a ``MethodError`` will be thrown anyway if a type
-is passed that does not support any of the requisite operations.
-(This is known as [duck typing](http://en.wikipedia.org/wiki/Duck_typing) .)
+这种类型特点是特别地与函数自变量相关。例如，不声明一个参数是 ``Int`` 类型或 ``Int32`` 类型，如果在这种情况下还可以保持是任何整数，那就应该是用 ``Integer`` 抽象表达出来的。事实上，在许多情况下您都可以把自变量类型给忽视掉，除非一些需要消除歧义的时候，由于如果一个类型不支持任何必要操作就会被忽略，那么一个 ``MethodError`` 不管怎样也都会被忽略掉。（这被大家认为是 [duck typing](https://en.wikipedia.org/wiki/Duck_typing)。）
 
-For example, consider the following definitions of a function
-``addone`` that returns one plus its argument:
+例如，考虑以下 ``addone`` 函数中的定义，这个功能可以返回 1 加上它的自变量。
 
 ```
     addone(x::Int) = x + 1             # works only for Int
@@ -56,22 +35,11 @@ For example, consider the following definitions of a function
     addone(x) = x + one(x)             # any type supporting + and one
 ```
 
-The last definition of ``addone`` handles any type supporting the
-``one`` function (which returns 1 in the same type as ``x``, which
-avoids unwanted type promotion) and the ``+`` function with those
-arguments.  The key thing to realize is that there is *no performance
-penalty* to defining *only* the general ``addone(x) = x + one(x)``,
-because Julia will automatically compile specialized versions as
-needed.  For example, the first time you call ``addone(12)``, Julia
-will automatically compile a specialized ``addone`` function for
-``x::Int`` arguments, with the call to ``one`` replaced by its inlined
-value ``1``.  Therefore, the first three definitions of ``addone``
-above are completely redundant.
+最后一个 ``addone`` 的定义解决了所有类型的有关自变量的 ``one`` 函数（像 ``x`` 类型一样返回 1 值，可以避免不想要的类型提供）和 ``+`` 函数的问题。关键是要意识到，仅仅是定义通用的 ``addone(x) = x + one(x)`` 写法也是没有性能缺失的，因为 Julia 会根据需要自主编译到专业的版本。举个例子，您第一次调用 ``addone(12)`` 的时候， Julia 会自动为 ``x::Int`` 自变量编译一个 ``addone`` 函数，通过调用一个内联值 ``1`` 代替 ``one``。因此，上表前三个定义全都是重复的。
 
-## Handle excess argument diversity in the caller
+## 在调用程序中解决额外的自变量多样性问题
 
-
-Instead of:
+取代这种写法：
 
 ```
     function foo(x, y)
@@ -81,7 +49,7 @@ Instead of:
     foo(x, y)
 ```
 
-use:
+利用以下的写法更好：
 
 ```
     function foo(x::Int, y::Int)
@@ -90,18 +58,13 @@ use:
     foo(int(x), int(y))
 ```
 
-This is better style because ``foo`` does not really accept numbers of all
-types; it really needs ``Int`` s.
+第二种写法更好的方式，因为 ``foo`` 并没有真正接受所有类型的数据；它真正需要的是 ``Int`` S。
 
-One issue here is that if a function inherently requires integers, it
-might be better to force the caller to decide how non-integers should
-be converted (e.g. floor or ceiling). Another issue is that declaring
-more specific types leaves more "space" for future method definitions.
+这里的一个问题是，如果一个函数本质上需要整数，可能更好的方式是强制调用程序来决定怎样转换非整数（例如最低值或最高值）。另一个问题是，声明更具体的类型会为未来的方法定义提供更多的“空间”。
 
-## 如果函数修改了它的参数，在函数名后加 `!`
+## 如果函数修改了它的参数，在函数名后加 *!*
 
-
-Instead of:
+取代这种写法：
 
 ```
     function double{T<:Number}(a::AbstractArray{T})
@@ -110,7 +73,7 @@ Instead of:
     end
 ```
 
-use:
+利用以下写法更好：
 
 ```
     function double!{T<:Number}(a::AbstractArray{T})
@@ -119,44 +82,32 @@ use:
     end
 ```
 
-The Julia standard library uses this convention throughout and
-contains examples of functions with both copying and modifying forms
-(e.g., ``sort`` and ``sort!``), and others which are just modifying
-(e.g., ``push!``, ``pop!``, ``splice!``).  It is typical for
-such functions to also return the modified array for convenience.
+Julia 标准库在整个过程中使用以上约定，并且 Julia 标准库还包含一些函数复制和修饰形式的例子（例如 ``sort`` 和 ``sort!``），或是其它只是在修饰（例如 ``push!``, ``pop!``,``splice!``）的例子。这对一些也要为了方便而返回修改后数组的函数来说是很典型的。
 
 ## 避免奇葩的类型集合
 
 像 ``Union(Function,String)`` 这样的类型，说明你的设计有问题。
 
-## Try to avoid nullable fields
+## 尽量避免空域
 
+当使用 ``x::Union(Nothing,T)`` 时，想想把 ``x`` 转换成 ``nothing`` 这个选项是否是必要的。以下是一些可供选择的替代选项
 
-When using ``x::Union(Nothing,T)``, ask whether the option for ``x`` to be
-``nothing`` is really necessary. Here are some alternatives to consider:
+- 找到一个安全的默认值来和 ``x`` 一起初始化
+- 介绍另一种缺少 ``x`` 的类型
+- 如果有许多类似 ``x`` 的域，就把它们存储在字典中
+- 确定当 ``x`` 是 ``noting`` 时是否有一个简单的规则。例如，域通常是以 ``nothing`` 开始的，但是是在一些定义良好的点被初始化。在这种情况下，要首先考虑它可能没被定义。
 
-- Find a safe default value to initialize ``x`` with
-- Introduce another type that lacks ``x``
-- If there are many fields like ``x``, store them in a dictionary
-- Determine whether there is a simple rule for when ``x`` is ``nothing``.
-  For example, often the field will start as ``nothing`` but get initialized at
-  some well-defined point. In that case, consider leaving it undefined at first.
+## 避免复杂的容器类型
 
-## Avoid elaborate container types
-
-
-It is usually not much help to construct arrays like the following::
+通常情况下，像下面这样创建数组是没什么帮助的：
 
 ```
     a = Array(Union(Int,String,Tuple,Array), n)
 ```
 
-In this case ``cell(n)`` is better. It is also more helpful to the compiler
-to annotate specific uses (e.g. ``a[i]::Int``) than to try to pack many
-alternatives into one type.
+在这种情况下 ``cell(n)`` 这样写更好一些。 这也有助于对编译器进行注释这一特定用途，而不是试图将许多选择打包成一种类型。
 
 ## 使用和 Julia ``base/`` 相同的命名传统
-
 
 - 模块和类型名称以大写开头, 并且使用驼峰形式: ``module SparseMatrix``,
   ``immutable UnitRange``.
@@ -171,23 +122,19 @@ alternatives into one type.
 如果一个函数需要多个单词来描述, 想一下这个函数是否包含了多个概念, 这样
 的情况下最好分拆成多个部分.
 
-
 ## 不要滥用 try-catch
 
-
-It is better to avoid errors than to rely on catching them.
+避免错误要比依赖找错好多了。
 
 ## 不要把条件表达式用圆括号括起来
 
-
-Julia doesn't require parens around conditions in ``if`` and ``while``.
-Write:
+Julia 在 if 和 while 语句中不需要括号。所以要这样写：
 
 ```
     if a == b
 ```
 
-instead of:
+来取代：
 
 ```
     if (a == b)
@@ -195,74 +142,50 @@ instead of:
 
 ## 不要滥用 ...
 
+剪接功能参数可以让人很依赖。取代 ``[a..., b...]`` 这种写法，简单的 ``[a, b]`` 这样写就已经连接数组了。``collect(a)`` 的写法要比 ``[a...]`` 好，但是因为 ``a`` 已经是可迭代的了，直接用 ``a`` 而不要把它转换到数组中也许会更好。
 
-Splicing function arguments can be addictive. Instead of ``[a..., b...]``,
-use simply ``[a, b]``, which already concatenates arrays.
-``collect(a)`` is better than ``[a...]``, but since ``a`` is already iterable
-it is often even better to leave it alone, and not convert it to an array.
+## 不要使用不必要的静态参数
 
-## Don't use unnecessary static parameters
-
-
-A function signature:
+信号函数：
 
 ```
     foo{T<:Real}(x::T) = ...
 ```
 
-should be written as:
+应该这样写：
 
 ```
     foo(x::Real) = ...
 ```
 
-instead, especially if ``T`` is not used in the function body.
-Even if ``T`` is used, it can be replaced with ``typeof(x)`` if convenient.
-There is no performance difference.
-Note that this is not a general caution against static parameters, just
-against uses where they are not needed.
+特别是如果 T 没被用在函数主体。即使 T 被用在函数主体了，如果方便的话也可以被 typeof(x) 替代。这在表现上并没有什么差异。要注意的是，这不是对一般的静态参数都要谨慎，只是在它们不会被用到时要特别留心。
 
-Note also that container types, specifically may need type parameters in
-function calls. See the FAQ :ref:`man-abstract-container-type`
-for more information.
+还要注意容器类型，特别是函数调用中可能需要的类型参数。可以到 FAQ [如何声明“抽象容器类型”的域 ](http://julia-cn.readthedocs.org/zh_CN/latest/manual/faq/#man-abstract-container-type)来查看更多信息。
 
-## Avoid confusion about whether something is an instance or a type
+## 避免对实例或类型判断的困扰
 
-
-Sets of definitions like the following are confusing:
+一些如以下的定义是十分让人困扰的：
 
 ```
     foo(::Type{MyType}) = ...
     foo(::MyType) = foo(MyType)
 ```
 
-Decide whether the concept in question will be written as ``MyType`` or
-``MyType()``, and stick to it.
+您要决定问题的概念是应被写作 ``MyType`` 或是 ``MyType()``,并要坚持下去。
 
-The preferred style is to use instances by default, and only add
-methods involving ``Type{MyType}`` later if they become necessary
-to solve some problem.
+最好的类型是用默认的实例，并且在解决某些问题需要方法时，再添加包括 ``Type{MyType}`` 的一些方法好一些。
 
-If a type is effectively an enumeration, it should be defined as a single
-(ideally ``immutable``) type, with the enumeration values being instances
-of it. Constructors and conversions can check whether values are valid.
-This design is preferred over making the enumeration an abstract type,
-with the "values" as subtypes.
+如果一个类型是一个有效的枚举，它就应该被定义为一个单一的（理想情况下不变的）类型，而枚举变量是它的实例。构造函数和一些转换可以检测值是否有效。这项设计最好把枚举做成抽象类型，把“值”做成其子类型。
 
 ## 不要滥用 macros
 
+您要注意什么时候一个 macros 可以真的代替函数。
 
-Be aware of when a macro could really be a function instead.
+在 macros 中调用 ``eval`` 实在是个危险的标志;这意味着 macros 只有在被最高级调用的时候才会工作。如果这样一个 macros 被写为一个函数，它将自然地访问它需要的运行时值。
 
-Calling ``eval`` inside a macro is a particularly dangerous warning sign;
-it means the macro will only work when called at the top level. If such
-a macro is written as a function instead, it will naturally have access
-to the run-time values it needs.
+## 不要在接口层暴露不安全的操作
 
-## Don't expose unsafe operations at the interface level
-
-
-If you have a type that uses a native pointer:
+如果您有一个使用本地指针的类型：
 
 ```
     type NativeType
@@ -271,47 +194,30 @@ If you have a type that uses a native pointer:
     end
 ```
 
-don't write definitions like the following:
+不要像下面这样写定义：
 
 ```
     getindex(x::NativeType, i) = unsafe_load(x.p, i)
 ```
 
-The problem is that users of this type can write ``x[i]`` without realizing
-that the operation is unsafe, and then be susceptible to memory bugs.
+问题是，这种类型的用户可能在不知道该操作是不安全的情况下就写 ``[i]``，这容易导致内存错误。
 
-Such a function should either check the operation to ensure it is safe, or
-have ``unsafe`` somewhere in its name to alert callers.
+这样的函数应该能检查操作，以确保它是安全的，或是在它的名字中有不安全的地方时可以提醒调用程序。
 
-##Don't overload methods of base container types
+## 不要重载基容器类型的方法
 
-
-It is possible to write definitions like the following:
+像下面这样书写定义是有可能的：
 
 ```
     show(io::IO, v::Vector{MyType}) = ...
 ```
 
-This would provide custom showing of vectors with a specific new element type.
-While tempting, this should be avoided. The trouble is that users will expect
-a well-known type like ``Vector`` to behave in a certain way, and overly
-customizing its behavior can make it harder to work with.
+这样写将提供一个特定新元素类型的向量的自定义显示。虽然很让人想尝试，但却是应该避免的。麻烦的是，用户会想用一个众所周知的类型比如向量在一个特定的方式下的行为，也会过度定制它的行为，这都会使工作更困难。
 
-## Be careful with type equality
+## 注意类型的相等性
 
-
-You generally want to use ``isa`` and ``<:`` (``issubtype``) for testing types,
-not ``==``. Checking types for exact equality typically only makes sense
-when comparing to a known concrete type (e.g. ``T == Float64``), or if you
-*really, really* know what you're doing.
+您一般要使用 ``isa`` 和 ``<:`` (``issubtype``) 来测试类型而不会用 ``==``。在与已知的具体类型的类型进行比较时，要精确检查类型的的相等性（例如 ``T == Float64``），或者是您真的明白您究竟在干什么。
 
 ## 不要写 ``x->f(x)``
 
-
 高阶函数经常被用作匿名函数来调用，虽然这样很方便，但是尽量少这么写。例如，尽量把 ``map(x->f(x), a)`` 写成 ``map(f, a)`` 。
-
-.. Since higher-order functions are often called with anonymous functions, it
-.. is easy to conclude that this is desirable or even necessary.
-.. But any function can be passed directly, without being "wrapped" in an
-.. anonymous function. Instead of writing ``map(x->f(x), a)``, write
-.. ``map(f, a)``.

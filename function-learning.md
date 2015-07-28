@@ -32,7 +32,7 @@ julia> g(2,3)
 5
 ```
 
-调用函数有两种方法：使用特定函数名的特殊运算符语法（详见后面函数运算符），或者使用 `apply` 函数：
+调用函数有两种方法：使用特定函数名的特殊运算符语法（详见后面[函数运算符](http://julia-cn.readthedocs.org/zh_CN/latest/manual/functions/#operators-are-functions)），或者使用 `apply` 函数：
 
 ```
 julia> apply(f,2,3)
@@ -50,7 +50,7 @@ julia> ∑(x,y) = x + y
 
 ## 参数传递行为
  
-Julia 函数的参数遵循 “pass-by-sharing” 的惯例，即不传递值，而是传递引用。函数参数本身，有点儿像新变量 绑定 （引用值的新位置），但它们引用的值与传递的值完全相同。对可变值（如数组）的修改，会影响其它函数。
+Julia 函数的参数遵循 “pass-by-sharing” 的惯例，即不传递值，而是传递引用。函数参数本身，有点儿像新变量*绑定*（引用值的新位置），但它们引用的值与传递的值完全相同。对可变值（如数组）的修改，会影响其它函数。
 
 ### `return` 关键字
 
@@ -80,7 +80,7 @@ julia> g(2,3)
 6
 ```
 
-在纯线性函数体，比如 g 中，不需要使用 `return` ，它不会计算表达式 `x + y` 。可以把 `x * y` 作为函数的最后一个表达式，并省略 `return` 。只有涉及其它控制流时， `return` 才有用。下例计算直角三角形的斜边长度，其中直角边为 `x` 和 `y` ，为避免溢出：
+在纯线性函数体，比如 g 中，不需要使用 `return` ，它不会计算表达式 `x + y` 。可以把 `x * y` 作为函数的最后一个表达式，并省略 `return` 。只有涉及其它控制流时， `return` 才有用。下例计算直角三角形的斜边长度，其中直角边为 x 和 y，为避免溢出：
 
 ```
 function hypot(x,y)
@@ -102,7 +102,7 @@ end
 
 ## 函数运算符
 
-Julia 中，大多数运算符都是支持特定语法的函数。 `&&` 、 `||` 等短路运算是例外，它们不是函数，因为[短路求值](http://julia-cn.readthedocs.org/zh_CN/latest/manual/control-flow/#man-short-circuit-evaluation)先算前面的值，再算后面的值。 对于函数运算符，可以像其它函数一样，把参数列表用圆括号括起来，作为函数运算符的参数：
+Julia 中，大多数运算符都是支持特定语法的函数。 `&&` 、 `||` 等短路运算是例外，它们不是函数，因为[*短路求值*](http://julia-cn.readthedocs.org/zh_CN/latest/manual/control-flow/#man-short-circuit-evaluation)先算前面的值，再算后面的值。对于函数运算符，可以像其它函数一样，把参数列表用圆括号括起来，作为函数运算符的参数：
 
 ```
 julia> 1 + 2 + 3
@@ -129,14 +129,14 @@ julia> f(1,2,3)
 
 |表达式	|调用|
 |:----|:----|
-|[A B C ...]	|hcat|
-|[A, B, C, ...]	|vcat|
-|[A B; C D; ...]|	hvcat|
-|A'	|ctranspose|
-|A.'	|transpose|
-|1:n	|colon|
-|A[i]|	getindex|
-|A[i]=x	|setindex!|
+|`[A B C ...]`	|`hcat`|
+|`[A, B, C, ...]`	|`vcat`|
+|`[A B; C D; ...]`|	`hvcat`|
+|`A'`	|`ctranspose`|
+|`A.'`	|`transpose`|
+|`1:n`	|`colon`|
+|`A[i]`|	`getindex`|
+|`A[i]=x`	|`setindex!`|
 这些函数都存在于 `Base.Operators` 模块中。
 
 ## 匿名函数
@@ -199,7 +199,7 @@ julia> y
 6
 ```
 
-也可以通过 return 来返回：
+也可以通过 `return` 来返回：
 
 ```
 function foo(a,b)
@@ -308,7 +308,7 @@ no method baz(Int64,Int64,Int64)
 
 ## 可选参数
 
-很多时候，函数参数都有默认值。例如，库函数 `parseint(num,base)` 把字符串解析为某个进制的数。 `base` 参数默认为 `10` 。这种情形可以写为：
+很多时候，函数参数都有默认值。例如，库函数 `parseint(num,base)` 把字符串解析为某个进制的数。`base` 参数默认为 `10`。这种情形可以写为：
 
 ```
 function parseint(num, base=10)
@@ -316,7 +316,7 @@ function parseint(num, base=10)
 end
 ```
 
-这时，调用函数时，参数可以是一个或两个。当第二个参数未指明时，自动传递 `10` ：
+这时，调用函数时，参数可以是一个或两个。当第二个参数未指明时，自动传递 `10`：
 
 ```
 julia> parseint("12",10)
@@ -335,7 +335,7 @@ julia> parseint("12")
 
 有些函数的参数个数很多，或者有很多行为。很难记住如何调用这种函数。关键字参数，允许通过参数名来区分参数，便于使用、扩展这些复杂接口。
 
-例如，函数 `plot` 用于画出一条线。此函数有许多可选项，控制线的类型、宽度、颜色等。如果它接收关键字参数，当我们要指明线的宽度时，可以调用 `plot(x, y, width=2)` 之类的形式。这样的调用方法给参数添加了标签，便于阅读；也可以按任何顺序传递部分参数。
+例如，函数 `plot` 用于画出一条线。此函数有许多可选项，控制线的类型、宽度、颜色等。如果它接收关键字参数，当我们要指明线的宽度时，可以调用 `plot(x, y, width=2)`之类的形式。这样的调用方法给参数添加了标签，便于阅读；也可以按任何顺序传递部分参数。
 
 使用关键字参数的函数，在函数签名中使用分号来定义：
 
@@ -345,7 +345,7 @@ function plot(x, y; style="solid", width=1, color="black")
 end
 ```
 
-额外的关键字参数，可以像变参函数中一样，使用 ... 来匹配：
+额外的关键字参数，可以像变参函数中一样，使用 `...` 来匹配：
 
 ```
 function f(x; y=0, args...)
@@ -353,13 +353,13 @@ function f(x; y=0, args...)
 end
 ```
 
-在函数 `f` 内部， `args` 可以是 `(key,value)` 多元组的集合，其中 `key` 是符号。可以在函数调用时使用分号来传递这个集合, 如 `f(x, z=1; args...).` 这种情况下也可以使用字典。
+在函数 `f` 内部，`args` 可以是 `(key,value)` 多元组的集合，其中 `key` 是符号。可以在函数调用时使用分号来传递这个集合, 如 `f(x, z=1; args...).` 这种情况下也可以使用字典。
 
 关键字参数的默认值仅在必要的时候从左至右地被求值(当对应的关键字参数没有被传递)，所以默认的(关键字参数的)表达式可以调用在它之前的关键字参数。
 
 ## 默认值的求值作用域
 
-可选参数和关键字参数的区别在于它们的默认值是怎样被求值的。当可选的参数被求值时，只有在它 之前的 的参数在作用域之内; 与之相对的, 当关键字参数的默认值被计算时, 所有的 参数都是在作用域之内。比如，定义函数:
+可选参数和关键字参数的区别在于它们的默认值是怎样被求值的。当可选的参数被求值时，只有在它*之前的*的参数在作用域之内; 与之相对的, 当关键字参数的默认值被计算时, *所有的*参数都是在作用域之内。比如，定义函数:
 
 ```
 function f(x, a=b, b=1)
@@ -367,7 +367,7 @@ function f(x, a=b, b=1)
 end
 ```
 
-在 `a=b` 中的 `b` 指的是该函数的作用域之外的 `b` ，而不是接下来 的参数 `b`。然而，如果 `a` 和 `b` 都是关键字参数，那么它们都将在 生成在同一个作用域上， `a=b` 中的 `b` 指向的是接下来的参数 `b` (遮蔽 了任何外层空间的 `b`), 并且 `a=b` 会得到未定义变量的错误 (因为默认 参数的表达式是自左而右的求值的， `b` 并没有被赋值)。
+在 `a=b` 中的 `b` 指的是该函数的作用域之外的 `b` ，而不是接下来 的参数 `b`。然而，如果 `a` 和 `b` 都是关键字参数，那么它们都将在 生成在同一个作用域上，`a=b` 中的 `b` 指向的是接下来的参数 `b` (遮蔽了任何外层空间的 `b`), 并且 `a=b` 会得到未定义变量的错误 (因为默认 参数的表达式是自左而右的求值的，`b` 并没有被赋值)。
 
 ## 函数参数的块语法
 
@@ -400,19 +400,19 @@ map([A, B, C]) do x
 end
 ```
 
-The `do x` syntax creates an anonymous function with argument x and passes it as the first argument to `map`. Similarly, `do a,b` would create a two-argument anonymous function, and a plain `do` would declare that what follows is an anonymous function of the form `() -> ....`
+`do x` 的语法创建一个含有参数 `x` 的匿名函数，并将其传给 `map` 作为第一个参数。类似地，`do a,b`  将创建一个含有两个参数的匿名函数，和一个朴素的 `do` 的声明以 `() -> ....` 方式说明如下是一个匿名函数。
+ 
+如何将这些参数初始化取决于“外部”函数；在这里，`map` 将依次设置 `x` 到 `A`, `B`, `C`，每个都将调用匿名函数，就像在语法  `map(func, [A, B, C])` 中做的一样。
 
-How these arguments are initialized depends on the “outer” function; here, `map` will sequentially set `x` to `A, B, `C`, calling the anonymous function on each, just as would happen in the syntax `map(func, [A, B, C])`.
+因为语法的调用看起来像正常的代码块，所以这种语法使它更容易使用函数来有效地扩展语言。这里有许多可能的完全不同于 `map` 的用途，如管理系统状态。例如，有一个版本的 `open`，运行代码来确保打开的文件最终关闭：
 
-This syntax makes it easier to use functions to effectively extend the language, since calls look like normal code blocks. There are many possible uses quite different from `map`, such as managing system state. For example, there is a version of `open` that runs code ensuring that the opened file is eventually closed:
-
-```
+````map` 
 open("outfile", "w") do io
     write(io, data)
 end
 ```
 
-This is accomplished by the following definition:
+它可以通过以下定义来实现：
 
 ```
 function open(f::Function, args...)
@@ -425,6 +425,6 @@ function open(f::Function, args...)
 end
 ```
 
-In contrast to the map example, here io is initialized by the result of `open("outfile", "w")`. The stream is then passed to your anonymous function, which performs the writing; finally, the `open` function ensures that the stream is closed after your function exits. The `try/finally` construct will be described in [控制流](control-learning.md).
+对比的 `map` 的例子，这里的 IO 是通过 `open("outfile", "w")`来实现初始化的。字符流之后会传递给您的执行写入的匿名函数；最后，`open` 的功能确保流在您的函数结束后是关闭状态的。  `try/finally` 的构造将在 [*控制流*](control-learning.md) 中被描述。
 
-With the do block syntax, it helps to check the documentation or implementation to know how the arguments of the user function are initialized.
+do 块语法的使用有助于检查文档或实现了解用户函数的参数是如何被初始化的。

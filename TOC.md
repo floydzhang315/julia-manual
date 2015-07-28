@@ -1,33 +1,33 @@
-- [简介](introduce.md)
+- [简介](introduce.md)    
 - [开始](begining.md)
-- [变量](variable.md)
-- [整数和浮点数](integer-and-floating.md)
-- [数学运算和基本函数](operation-function.md)
+- [变量](variable.md)  -于倩
+- [整数和浮点数](integer-and-floating.md)-于倩
+- [数学运算和基本函数](operation-function.md)-于倩
 - [复数和分数](complex-fraction.md)
-- [字符串](string-learning.md)
-- [函数](function-learning.md)
-- [控制流](control-learning.md)
-- [变量的作用域](applied-force.md)
-- [类型](type-learning.md)
-- [方法](method-learning.md)
+- [字符串](string-learning.md)-于倩
+- [函数](function-learning.md)-于倩
+- [控制流](control-learning.md)-于倩
+- [变量的作用域](applied-force.md)-于倩
+- [类型](type-learning.md)-于倩
+- [方法](method-learning.md)-于倩
 - [构造函数](constructed-function.md)
-- [类型转换和类型提升](type-transformation.md)
-- [模块](module-learning.md)
-- [元编程](cell-code.md)
-- [多维数组](mutil-array.md)
-- [线性代数](linear-algebra.md)
-- [网络和流](newwork-stream.md)
-- [并行计算](concurrent-computation.md)
+- [类型转换和类型提升](type-transformation.md)-于倩
+- [模块](module-learning.md)-于倩
+- [元编程](cell-code.md)-于倩
+- [多维数组](mutil-array.md)-于倩
+- [线性代数](linear-algebra.md)-于倩
+- [网络和流](newwork-stream.md)-牛子健
+- [并行计算](concurrent-computation.md)-牛子健
 - [日期和时间](date-time.md)
 - [可空类型](type-null.md)
-- [Interacting With Julia](interacting-with-julia.md)
+- [Interacting With Julia](interacting-with-julia.md)-牛子健
 - [运行外部程序](run-extend-code.md)
-- [调用 C 和 Fortran 代码](use-c-fortran.md)
-- [嵌入式 Julia](flushbonading-julia.md)
-- [扩展包](extend-package.md)
-- [开发扩展包](develop-extend-package.md)
-- [代码性能优化](code-optimize.md)
-- [代码样式](code-style.md)
-- [常见问题](faq.md)
+- [调用 C 和 Fortran 代码](use-c-fortran.md)-牛子健
+- [嵌入式 Julia](flushbonading-julia.md)-黄偲琪
+- [扩展包](extend-package.md)-黄偲琪
+- [开发扩展包](develop-extend-package.md)-于洋
+- [代码性能优化](code-optimize.md)-于洋
+- [代码样式](code-style.md)-张鸿硕
+- [常见问题](faq.md)-张鸿硕
 - [与其他语言的区别](code-different.md)
 

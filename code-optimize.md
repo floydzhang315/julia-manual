@@ -1,7 +1,4 @@
-
-
 # 代码性能优化
-
 
 以下几节将描述一些提高 Julia 代码运行速度的技巧。
 
@@ -27,11 +24,9 @@ y = f(x::Int + 1)
 
 写函数是一种更好的风格，这会产生更多可重复和清晰的代码，也包括清晰的输入和输出。
 
-
 ## 使用 ``@time`` 来衡量性能并且留心内存分配
 
-
-衡量计算性能最有用的工具是 ``@time`` 宏. 下面的例子展示了良好的使用方式 :
+衡量计算性能最有用的工具是 ``@time`` 宏。下面的例子展示了良好的使用方式 :
 
 ```
   julia> function f(n)
@@ -115,14 +110,13 @@ if (f = rand()) < .8
 end
 ```
 
-因为`a`是一个抽象类型`Real`的 array，所以可以包含任何`Real`类型的值。既然`Real`对象可以是任意的大小和结构，`a`必须被解释为一个array数组指向所有可能的对象。所以我们应该用确定的类型代替，比如`Float64`:
+因为 `a` 是一个抽象类型 `Real` 的 array，所以可以包含任何 `Real` 类型的值。既然 `Real` 对象可以是任意的大小和结构，`a` 必须被解释为一个 array 数组指向所有可能的对象。所以我们应该用确定的类型代替，比如 `Float64`:
 
 ```
 a = Float64[] # typeof(a) = Array{Float64,1}
 ```
 
 这样会建立大小为 64 位的浮点值，也会更有效率。
-
 
 ## 类型声明
 
@@ -277,16 +271,12 @@ Julia 的编译器依靠参数类型来优化代码。第一个实现中，编�
 
 形如 ``strange_twos`` 之类的函数经常用于处理未知类型的数据。比如，从文件载入的数据，可能包含整数、浮点数、字符串，或者其他类型。
 
-## Access arrays in memory order, along columns
+## 内存列中的访问数组
 
+Julia 中的多维数组是根据以列为主的顺序存储的。这意味着每次数组都占据了一列。我们可以通过如下所示的 ``vec`` 功能或者是 或是排列 ``[:]`` 来进行验证（注意到数组的顺序是 ``[1 3 2 4]`` 而不是 ``[1 2 3 4]`` ）：
 
-Multidimensional arrays in Julia are stored in column-major order. This
-means that arrays are stacked one column at a time. This can be verified
-using the ``vec`` function or the syntax ``[:]`` as shown below (notice
-that the array is ordered ``[1 3 2 4]``, not ``[1 2 3 4]``):
-
-```
-julia> x = [1 2; 3 4]
+``` 
+julia> x = [1 2; 3 4]  
 2x2 Array{Int64,2}:
  1  2
  3  4
@@ -299,24 +289,9 @@ julia> x[:]
  4
 ```
 
-This convention for ordering arrays is common in many languages like
-Fortran, Matlab, and R (to name a few). The alternative to column-major
-ordering is row-major ordering, which is the convention adopted by C and
-Python (``numpy``) among other languages. Remembering the ordering of
-arrays can have significant performance effects when looping over
-arrays. A rule of thumb to keep in mind is that with column-major
-arrays, the first index changes most rapidly. Essentially this means
-that looping will be faster if the inner-most loop index is the first to
-appear in a slice expression.
+这种给数组排序的约定在许多语言中都是常见的，比如 Fortran ， Matlab ，和 R 语言(举几个例子来说)。以列为主序的另一选择就是以行为主序，其它语言中的 C 语言和 Python 语言(``numpy``)就是选用了这种方式。记住数组的顺序对数组的查找有着至关重要的影响。要记住的一个查找规则就是对于基于列为顺序的数组，第一个指针是变化最快的。这基本上就意味着如果在一段代码中，循环指针是第一个，那么查找速度会更快。
 
-Consider the following contrived example. Imagine we wanted to write a
-function that accepts a ``Vector`` and and returns a square ``Matrix``
-with either the rows or the columns filled with copies of the input
-vector. Assume that it is not important whether rows or columns are
-filled with these copies (perhaps the rest of the code can be easily
-adapted accordingly). We could conceivably do this in at least four ways
-(in addition to the recommended call to the built-in function
-``repmat``):
+我们来看一下下面这个人为的例子。假设我们想要实现一个功能，接收一个 ``Vector`` 并且返回一个方形的 ``Matrix``，且行或列为输入矢量的复制。我们假设是行还是列为数据的复制并不重要（或许剩下的代码可以相应地更容易的适应）。我们可以想到有至少四种方法可以实现这一点（除了建议的回访正建的 ``repmat`` 功能）： 
 
 ```
 function copy_cols{T}(x::Vector{T})
@@ -356,8 +331,7 @@ function copy_row_col{T}(x::Vector{T})
 end
 ```
 
-Now we will time each of these functions using the same random ``10000``
-by ``1`` input vector:
+现在我们使用同样的输入向量 ``1`` 产生的随机数 ``10000`` 给每个功能计时：
 
 ```
 julia> x = randn(10000);
@@ -371,25 +345,13 @@ copy_col_row: 0.415630047
 copy_row_col: 1.721531501
 ```
 
-Notice that ``copy_cols`` is much faster than ``copy_rows``. This is
-expected because ``copy_cols`` respects the column-based memory layout
-of the ``Matrix`` and fills it one column at a time. Additionally,
-``copy_col_row`` is much faster than ``copy_row_col`` because it follows
-our rule of thumb that the first element to appear in a slice expression
-should be coupled with the inner-most loop.
+注意到 ``copy_cols`` 比 ``copy_rows`` 快很多。这是意料之中的，因为 ``copy_cols``  遵守 ``Matrix`` 界面的基于列的存储，并且一次就填满一列。除此之外，``copy_col_row`` 比 ``copy_row_col`` 快很多，因为它符合我们的查找规则，即在一段代码中第一个出现的元素应该是与最内部的循环相联系的。  
 
+## 输出预先分配
 
-## Pre-allocating outputs
+如果你的功能返回了一个 Array 或其它复杂类型，它可能不得不分配内存。不幸的是，时常分配和它的相反事件，垃圾区收集，是有实质性瓶颈的。  
 
-
-If your function returns an Array or some other complex
-type, it may have to allocate memory.  Unfortunately, oftentimes
-allocation and its converse, garbage collection, are substantial
-bottlenecks.
-
-Sometimes you can circumvent the need to allocate memory on each
-function call by pre-allocating the output.  As a
-trivial example, compare
+有时候，你可以在访问每个功能时通过预先分配输出来避开分配内存的需要。作为一个很小的例子，比较一下  
 
 ```
 function xinc(x)
@@ -406,7 +368,7 @@ function loopinc()
 end
 ```
 
-with
+和
 
 ```
 function xinc!{T}(ret::AbstractVector{T}, x::T)
@@ -427,7 +389,7 @@ function loopinc_prealloc()
 end
 ```
 
-Timing results:
+计时结果：
 
 ```
     julia> @time loopinc()
@@ -439,45 +401,35 @@ Timing results:
     50000015000000
 ```
 
-Pre-allocation has other advantages, for example by allowing the
-caller to control the "output" type from an algorithm.  In the example
-above, we could have passed a ``SubArray`` rather than an ``Array``,
-had we so desired.
+预先分配有其他好处，比如，允许访问者通过算法控制“输出”类型。在上面的例子中，我们可以按照自己希望的，通过一个 ``SubArray`` 而不是 ``Array``。
 
-Taken to its extreme, pre-allocation can make your code uglier, so
-performance measurements and some judgment may be required.
+按着最极端的来想，预先分配可以让你的代码看起来丑点，所以需要一些表达方式和判断。  
 
-## Avoid string interpolation for I/O
+## 避免输入/输出时的串插入  
 
-
-When writing data to a file (or other I/O device), forming extra
-intermediate strings is a source of overhead. Instead of:
+把数据写入文件（或者其他输入/输出设备）时，中间字符串的形成是额外的开销。而不是：  
 
 ```
     println(file, "$a $b")
 ```
 
-use::
+使用：
 
 ```
     println(file, a, " ", b)
 ```
 
-The first version of the code forms a string, then writes it
-to the file, while the second version writes values directly
-to the file. Also notice that in some cases string interpolation can
-be harder to read. Consider:
+第一种代码形成了一个字符串，然后把它写入了文件，而第二种代码直接把值写入了文件。同样也注意到在某些情况下，字符串的插入很难读出来。考虑一下：  
 
 ```
     println(file, "$(f(a))$(f(b))")
 ```
 
-versus::
+对比：
 
 ```
     println(file, f(a), f(b))
 ```
-
 
 ## 处理有关舍弃的警告
 
@@ -494,20 +446,14 @@ versus::
 -  对于整数除法，使用 ``div(x,y)`` 而不是 ``trunc(x/y)``, 使用 ``fld(x,y)`` 而不是 ``floor(x/y)``, 使用 ``cld(x,y)`` 而不是 ``ceil(x/y)``.
 
 
-## Performance Annotations
+## 性能注释
 
+有时你可以设定某些项目属性来获得更好的优化。  
 
-Sometimes you can enable better optimization by promising certain program
-properties.
+-  在检查公式时，使用 ``@inbounds`` 来消除数组界限。一定要在这之前完成。如果下标越界了，你可能会遇到崩溃或不执行的问题。
+-  在 ``for`` 循环之前写上  ``@simd``，这个可以帮你检验。**这个特征是试验性的**而且在之后的 Julia 版本中可能会改变会消失。
 
--  Use ``@inbounds`` to eliminate array bounds checking within expressions.
-   Be certain before doing this. If the subscripts are ever out of bounds,
-   you may suffer crashes or silent corruption.
--  Write ``@simd`` in front of ``for`` loops that are amenable to vectorization.
-   **This feature is experimental** and could change or disappear in future
-   versions of Julia.
-
-Here is an example with both forms of markup:
+这里有一个包含两种形式审定的例子：  
 
 ```
     function inner( x, y )
@@ -543,31 +489,23 @@ Here is an example with both forms of markup:
     timeit(1000,1000)
 ```
 
-On a computer with a 2.4GHz Intel Core i5 processor, this produces:
+在配有 2.4GHz 的 Intel Core i5 处理器的电脑上，产生如下结果：  
 
 ```
     GFlop        = 1.9467069505224963
     GFlop (SIMD) = 17.578554163920018
 ```
 
-The range for a ``@simd for`` loop should be a one-dimensional range.
-A variable used for accumulating, such as ``s`` in the example, is called
-a *reduction variable*. By using``@simd``, you are asserting several
-properties of the loop:
+``@simd for`` 循环应该是一维范围的。*缩减变数* 是用于累积变量的，比如例子中的 ``s``。通过使用 ``@simd``，你可以维护循环的几种性能：  
 
--  It is safe to execute iterations in arbitrary or overlapping order,
-   with special consideration for reduction variables.
--  Floating-point operations on reduction variables can be reordered,
-   possibly causing different results than without ``@simd``.
--  No iteration ever waits on another iteration to make forward progress.
+-  有缩减变数的特殊考虑后，在任意的或重叠的顺序中执行迭代都是安全的。
+-  减少变量的浮点操作可以被重复执行，但是可能会比没有 ``@simd`` 产生不同的结果。  
+-  不会有一个迭代在等待另一个迭代，以实现前进。  
 
-Using ``@simd`` merely gives the compiler license to vectorize. Whether
-it actually does so depends on the compiler. To actually benefit from the
-current implementation, your loop should have the following additional
-properties:
+使用 ``@simd`` 仅仅是给了编译器矢量化的通行证。它是不是真的会这样做还取决于编译器。要真正从当前的实现中获益，你的循环应该有如下额外的性能：   
 
--  The loop must be an innermost loop.
--  The loop body must be straight-line code. This is why ``@inbounds`` is currently needed for all array accesses.
--  Accesses must have a stride pattern and cannot be "gathers" (random-index reads) or "scatters" (random-index writes).
-- The stride should be unit stride.
-- In some simple cases, for example with 2-3 arrays accessed in a loop, the LLVM auto-vectorization may kick in automatically, leading to no further speedup with ``@simd``.
+-  循环必须是内部循环。
+-  循环主题必须是无循环程序。这就是为什么当前所有的数组访问都需要 ``@inbounds`` 的原因了。
+-  访问必须有一个跨越模式，而且不能“聚集”（随机指针读取）或者“分散”（随机指针写入）。
+-  跨越应该是单元跨越。
+-  在一些简单的例子中，例如一个 2-3 数组访问的循环中，LLVM 自动矢量化可能会自动生效，导致无需 ``@simd`` 的进一步加速。
